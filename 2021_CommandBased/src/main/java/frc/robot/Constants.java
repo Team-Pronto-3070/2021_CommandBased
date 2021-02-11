@@ -12,4 +12,18 @@ package frc.robot;
  * <p>It is advised to statically import this class (or one of its inner classes) wherever the
  * constants are needed, to reduce verbosity.
  */
-public final class Constants {}
+public final class Constants {
+
+    //Drive Talon Ports
+    public final static int FAL_LM_PORT = -1;
+    public final static int FAL_LF_PORT = -1;
+    public final static int FAL_RM_PORT = -1;
+    public final static int FAL_RF_PORT = -1;
+
+    //Intake Talon Ports
+
+
+    //Drive Subsystem Constants
+    public static double RAMP_TIME = 0.4;   //Number of seconds for a falcon to ramp from 0 -> 1
+    public static double INPUT_CAP = 0.95;  //Max input value for a falcon
+}
