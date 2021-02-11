@@ -109,6 +109,8 @@ Temporary Items
 !.vscode/launch.json
 !.vscode/extensions.json
 
+*.vs/*
+
 ### Windows ###
 # Windows thumbnail cache files
 Thumbs.db
@@ -130,6 +132,8 @@ $RECYCLE.BIN/
 *.msix
 *.msm
 *.msp
+
+*.json
 
 # Windows shortcuts
 *.lnk
