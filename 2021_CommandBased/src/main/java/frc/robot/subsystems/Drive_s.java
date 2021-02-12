@@ -13,15 +13,37 @@ import frc.robot.Constants;
 
 public class Drive_s extends SubsystemBase{
 
-
+    TalonFX talFL; // Creates motor objects
+    TalonFX talFR;
+    TalonFX talBL;
+    TalonFX talBR;
+ 
+    /**
+     * Constructor
+     * 
+    */ 
+    
     public Drive_s(){
-
+        talFL = new TalonFX(Constants.TAL_FL_PORT);
+        talBL = new TalonFX(Constants.TAL_BL_PORT);
+        talFR = new TalonFX(Constants.TAL_FR_PORT);
+        talBR = new TalonFX(Constants.TAL_BR_PORT);
     }
 
+    /**
+     * Sets each motor speed separately. 
+     * 
+     * @param inputValues Double array for speeds of motors between -1 and 1 | [FL, FR, BL, BR]
+     */
     public void setIndividual(double[] inputValues){
-        
+        talFL.set(ControlMode.PercentOutput, inputValues[0]);
     }
 
+    /**
+     * 
+     * @param leftInput
+     * @param rightInput
+     */
     public void setTank(double leftInput, double rightInput){
 
     }

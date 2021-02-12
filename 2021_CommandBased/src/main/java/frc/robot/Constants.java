@@ -15,10 +15,10 @@ package frc.robot;
 public final class Constants {
 
     //Drive Talon Ports
-    public final static int FAL_LM_PORT = -1;
-    public final static int FAL_LF_PORT = -1;
-    public final static int FAL_RM_PORT = -1;
-    public final static int FAL_RF_PORT = -1;
+    public final static int TAL_FL_PORT = -1;
+    public final static int TAL_BL_PORT = -1;
+    public final static int TAL_FR_PORT = -1;
+    public final static int TAL_BR_PORT = -1;
 
     //Intake Talon Ports
 
