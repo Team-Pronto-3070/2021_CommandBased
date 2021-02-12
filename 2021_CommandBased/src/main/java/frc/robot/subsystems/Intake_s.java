@@ -6,4 +6,12 @@ public class Intake_s extends SubsystemBase{
 
         
     }
+
+    public void set(double input){
+
+    }
+
+    public setSolenoid(boolean input){
+
+    }
 }
