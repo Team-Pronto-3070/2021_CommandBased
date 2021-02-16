@@ -52,6 +52,9 @@ public class Drive_s extends SubsystemBase{
      */
     public void setIndividual(double[] inputValues){
         talFL.set(ControlMode.PercentOutput, inputValues[0]);
+        talFR.set(ControlMode.PercentOutput, inputValues[0]);
+        talBL.set(ControlMode.PercentOutput, inputValues[0]);
+        talBR.set(ControlMode.PercentOutput, inputValues[0]);
     }
 
     /**
