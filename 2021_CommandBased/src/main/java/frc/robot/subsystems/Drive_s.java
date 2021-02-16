@@ -51,9 +51,9 @@ public class Drive_s extends SubsystemBase{
      * @param inputValues Double array for speeds of motors between -1 and 1 | [FL, FR, BL, BR]
      */
     public void setIndividual(double[] inputValues){
-        talFL.set(ControlMode.PercentOutput, inputValues[3]);
-        talFR.set(ControlMode.PercentOutput, inputValues[3]);
-        talBL.set(ControlMode.PercentOutput, inputValues[3]);
+        talFL.set(ControlMode.PercentOutput, inputValues[0]);
+        talFR.set(ControlMode.PercentOutput, inputValues[1]);
+        talBL.set(ControlMode.PercentOutput, inputValues[2]);
         talBR.set(ControlMode.PercentOutput, inputValues[3]);
     }
 
