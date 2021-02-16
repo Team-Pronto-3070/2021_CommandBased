@@ -55,12 +55,19 @@ public class Drive_s extends SubsystemBase{
     }
 
     /**
+     * Sets the speed of each side of the robot, putting it into tank drive
      * 
-     * @param leftInput
-     * @param rightInput
+     * @param leftInput Double for the speed of the left motors
+     * @param rightInput Double for the speed of the right motors
      */
     public void setTank(double leftInput, double rightInput){
-        
+
+        talFL.set(ControlMode.PercentOutput, leftInput); // Set the left motors
+        talBL.set(ControlMode.PercentOutput, leftInput);
+
+        talFR.set(ControlMode.PercentOutput, rightInput); // Set the right motors
+        talBR.set(ControlMode.PercentOutput, rightInput);
+
     }
 
     public void setRotateDegree(double angle /*, Gyroscope reference*/){
