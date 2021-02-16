@@ -8,6 +8,7 @@ import frc.robot.subsystems.Intake_s;
 public class AutoGroup extends SequentialCommandGroup{
 
     public AutoGroup(Drive_s drive, Intake_s intake){
-
+        
+        addRequirements(drive, intake);
     }
 }
