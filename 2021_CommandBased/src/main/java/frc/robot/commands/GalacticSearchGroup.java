@@ -5,10 +5,9 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.subsystems.Drive_s;
 import frc.robot.subsystems.Intake_s;
 
-public class AutoGroup extends SequentialCommandGroup{
-
-    public AutoGroup(Drive_s drive, Intake_s intake){
+public class GalacticSearchGroup extends SequentialCommandGroup {
+    
+    public GalacticSearchGroup(Drive_s drive, Intake_s intake) {
         
-        addRequirements(drive, intake);
     }
 }

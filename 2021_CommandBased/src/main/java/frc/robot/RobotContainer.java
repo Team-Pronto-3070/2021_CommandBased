@@ -6,8 +6,12 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
-import frc.robot.commands.ExampleCommand;
-import frc.robot.commands.AutoGroup;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import frc.robot.commands.AutoNavBarrelGroup;
+import frc.robot.commands.AutoNavBounceGroup;
+import frc.robot.commands.AutoNavSlalomGroup;
+import frc.robot.commands.GalacticSearchGroup;
 import frc.robot.subsystems.*;
 import edu.wpi.first.wpilibj2.command.Command;
 
@@ -18,16 +22,33 @@ import edu.wpi.first.wpilibj2.command.Command;
  * subsystems, commands, and button mappings) should be declared here.
  */
 public class RobotContainer {
-  // The robot's subsystems and commands are defined here...
+  // define subsystems
   private final Drive_s m_drive = new Drive_s();
   private final Intake_s m_intake = new Intake_s();
 
-  private final AutoGroup m_autoCommand = new AutoGroup(m_drive, m_intake);
+  // define commands
+  private final Command m_autoNavBarrelGroup = new AutoNavBarrelGroup(m_drive);
+  private final Command m_autoNavBounceGroup = new AutoNavBounceGroup(m_drive);
+  private final Command m_autoNavSlalomGroup = new AutoNavSlalomGroup(m_drive);
+  private final Command m_galacticSearchGroup = new GalacticSearchGroup(m_drive, m_intake);
+
+  //define a sendable chooser to select the autonomous command
+  SendableChooser<Command> autoCommandChooser = new SendableChooser<Command>();
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     // Configure the button bindings
     configureButtonBindings();
+
+    //add options to the chooser
+    autoCommandChooser.setDefaultOption("None", null);
+    autoCommandChooser.addOption("Auto Nav - Barrel path", m_autoNavBarrelGroup);
+    autoCommandChooser.addOption("Auto Nav - Bounce path", m_autoNavBounceGroup);
+    autoCommandChooser.addOption("Auto Nav - Slalom path", m_autoNavSlalomGroup);
+    autoCommandChooser.addOption("Galactic Search", m_galacticSearchGroup);
+
+    //put the chooser on the dashboard
+    SmartDashboard.putData(autoCommandChooser);
   }
 
   /**
@@ -45,6 +66,6 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     // An ExampleCommand will run in autonomous
-    return m_autoCommand;
+    return autoCommandChooser.getSelected();
   }
 }
