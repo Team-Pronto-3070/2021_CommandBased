@@ -29,5 +29,7 @@ public final class Constants {
 
     //Joystick port
     public final static int JOY_PORT = -1;
-
+  
+    //Intake subsystem
+    public final static int INTAKE_SOLENOID_PORT = -1;
 }
