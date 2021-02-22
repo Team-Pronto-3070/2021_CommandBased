@@ -26,4 +26,5 @@ public final class Constants {
     //Drive Subsystem Constants
     public static double RAMP_TIME = 0.4;   //Number of seconds for a falcon to ramp from 0 -> 1
     public static double INPUT_CAP = 0.95;  //Max input value for a falcon
+    public static final double DRIVETRAIN_RADIUS_INCHES = 17.284903;
 }
