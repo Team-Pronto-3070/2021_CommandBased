@@ -80,7 +80,7 @@ public class Drive_s extends SubsystemBase{
     }
 
     public void driveAndTurn(double vx, double vy, double omega) {
-        XdriveWheelSpeeds wheelSpeeds = kinematics.toWheelSpeeds(new ChassisSpeeds(vx, vy, omega));
+        XdriveWheelSpeeds wheelSpeeds = kinematics.toWheelSpeeds(ChassisSpeeds.fromFieldRelativeSpeeds(vx, vy, omega, odometry.getPoseMeters().getRotation()));
         wheelSpeeds.normalize(1.0);
         setIndividual(new double[] {wheelSpeeds.frontLeftMetersPerSecond,
                                     wheelSpeeds.frontRightMetersPerSecond,
