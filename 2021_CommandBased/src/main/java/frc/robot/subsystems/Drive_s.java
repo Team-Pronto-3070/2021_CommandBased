@@ -16,6 +16,7 @@ import com.ctre.phoenix.motorcontrol.can.TalonFX;
 //Local file imports
 import frc.robot.Constants;
 import frc.robot.util.XdriveKinematics;
+import frc.robot.util.XdriveOdometry;
 import frc.robot.util.XdriveWheelSpeeds;
 
 public class Drive_s extends SubsystemBase{
@@ -27,6 +28,9 @@ public class Drive_s extends SubsystemBase{
 
     //create kinematics
     XdriveKinematics kinematics;
+
+    //create odometry
+    XdriveOdometry odometry;
 
     /**
      * Constructor
@@ -58,6 +62,9 @@ public class Drive_s extends SubsystemBase{
                                           new Translation2d(Units.inchesToMeters(Constants.DRIVETRAIN_RADIUS_INCHES), new Rotation2d(1 * Math.PI / 4)),
                                           new Translation2d(Units.inchesToMeters(Constants.DRIVETRAIN_RADIUS_INCHES), new Rotation2d(5 * Math.PI / 4)),
                                           new Translation2d(Units.inchesToMeters(Constants.DRIVETRAIN_RADIUS_INCHES), new Rotation2d(7 * Math.PI / 4)));
+        
+        //initialize odometry
+        odometry = new XdriveOdometry();
     }
 
     /**
@@ -103,5 +110,10 @@ public class Drive_s extends SubsystemBase{
 
     public void setStop(){
         
+    }
+
+    @Override
+    public void periodic() {
+        odometry.update();
     }
 }
