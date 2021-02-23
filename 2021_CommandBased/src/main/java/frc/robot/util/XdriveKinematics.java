@@ -166,9 +166,9 @@ public class XdriveKinematics {
    */
   private void setInverseKinematics(
       Translation2d fl, Translation2d fr, Translation2d rl, Translation2d rr) {
-    m_inverseKinematics.setRow(0, 0, -1 / Math.sqrt(2), -1 / Math.sqrt(2), fl.getNorm());
-    m_inverseKinematics.setRow(1, 0, -1 / Math.sqrt(2), 1 / Math.sqrt(2), fr.getNorm());
-    m_inverseKinematics.setRow(2, 0, 1 / Math.sqrt(2), -1 / Math.sqrt(2), rl.getNorm());
-    m_inverseKinematics.setRow(3, 0, 1 / Math.sqrt(2), 1 / Math.sqrt(2), rr.getNorm());
+    m_inverseKinematics.setRow(0, 0, -1 / Math.sqrt(2), 1 / Math.sqrt(2), fl.getNorm());
+    m_inverseKinematics.setRow(1, 0, 1 / Math.sqrt(2), 1 / Math.sqrt(2), fr.getNorm());
+    m_inverseKinematics.setRow(2, 0, -1 / Math.sqrt(2), -1 / Math.sqrt(2), rl.getNorm());
+    m_inverseKinematics.setRow(3, 0, 1 / Math.sqrt(2), -1 / Math.sqrt(2), rr.getNorm());
   }
 }
