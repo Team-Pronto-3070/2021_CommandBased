@@ -4,6 +4,9 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import com.ctre.phoenix.motorcontrol.ControlMode;
 
+
+import frc.robot.Constants;
+
 public class Intake_s extends SubsystemBase{
     //Creates Talon
     TalonSRX talIN;
@@ -23,5 +26,4 @@ public class Intake_s extends SubsystemBase{
         talIN.set(ControlMode.PercentOutput, velocity);
     }
 
-    
 }

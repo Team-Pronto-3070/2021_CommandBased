@@ -1,5 +1,9 @@
 package frc.robot.subsystems;
 
+import edu.wpi.first.wpilibj.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.geometry.Translation2d;
+import edu.wpi.first.wpilibj.kinematics.ChassisSpeeds;
+import edu.wpi.first.wpilibj.util.Units;
 //First imports
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import com.ctre.phoenix.motorcontrol.ControlMode;
@@ -11,6 +15,8 @@ import com.ctre.phoenix.motorcontrol.can.TalonFX;
 
 //Local file imports
 import frc.robot.Constants;
+import frc.robot.util.XdriveKinematics;
+import frc.robot.util.XdriveWheelSpeeds;
 
 public class Drive_s extends SubsystemBase{
 
@@ -18,6 +24,9 @@ public class Drive_s extends SubsystemBase{
     TalonFX talFR;
     TalonFX talBL;
     TalonFX talBR;
+
+    //create kinematics
+    XdriveKinematics kinematics;
 
     /**
      * Constructor
@@ -43,6 +52,12 @@ public class Drive_s extends SubsystemBase{
         talBL.configOpenloopRamp(Constants.RAMP_TIME);
         talFR.configOpenloopRamp(Constants.RAMP_TIME);
         talBR.configOpenloopRamp(Constants.RAMP_TIME);
+
+        //initialize kinematics
+        kinematics = new XdriveKinematics(new Translation2d(Units.inchesToMeters(Constants.DRIVETRAIN_RADIUS_INCHES), new Rotation2d(3 * Math.PI / 4)),
+                                          new Translation2d(Units.inchesToMeters(Constants.DRIVETRAIN_RADIUS_INCHES), new Rotation2d(1 * Math.PI / 4)),
+                                          new Translation2d(Units.inchesToMeters(Constants.DRIVETRAIN_RADIUS_INCHES), new Rotation2d(5 * Math.PI / 4)),
+                                          new Translation2d(Units.inchesToMeters(Constants.DRIVETRAIN_RADIUS_INCHES), new Rotation2d(7 * Math.PI / 4)));
     }
 
     /**
@@ -52,6 +67,18 @@ public class Drive_s extends SubsystemBase{
      */
     public void setIndividual(double[] inputValues){
         talFL.set(ControlMode.PercentOutput, inputValues[0]);
+        talFR.set(ControlMode.PercentOutput, inputValues[1]);
+        talBL.set(ControlMode.PercentOutput, inputValues[2]);
+        talBR.set(ControlMode.PercentOutput, inputValues[3]);
+    }
+
+    public void driveAndTurn(double vx, double vy, double omega) {
+        XdriveWheelSpeeds wheelSpeeds = kinematics.toWheelSpeeds(new ChassisSpeeds(vx, vy, omega));
+        wheelSpeeds.normalize(1.0);
+        setIndividual(new double[] {wheelSpeeds.frontLeftMetersPerSecond,
+                                    wheelSpeeds.frontRightMetersPerSecond,
+                                    wheelSpeeds.rearLeftMetersPerSecond,
+                                    wheelSpeeds.rearRightMetersPerSecond});
     }
 
     /**
