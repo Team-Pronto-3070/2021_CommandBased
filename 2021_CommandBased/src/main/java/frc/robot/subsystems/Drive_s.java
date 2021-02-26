@@ -113,6 +113,10 @@ public class Drive_s extends SubsystemBase{
         return odometry.getPoseMeters();
     }
 
+    public XdriveKinematics getKinematics() {
+        return kinematics;
+    }
+
     public void setRotateDegree(double angle /*, Gyroscope reference*/){
 
     }
