@@ -24,7 +24,7 @@ public class XdriveWheelSpeeds {
   public XdriveWheelSpeeds() {}
 
   /**
-   * Constructs a Xs=driveWheelSpeeds.
+   * Constructs a XdriveWheelSpeeds object.
    *
    * @param frontLeftMetersPerSecond Speed of the front left wheel.
    * @param frontRightMetersPerSecond Speed of the front right wheel.

@@ -21,16 +21,28 @@ public final class Constants {
     public final static int TAL_BR_PORT = -1;
 
     //Intake Talon Ports
-
+    public final static int TAL_INTAKE_PORT = -1;
 
     //Drive Subsystem Constants
     public static double RAMP_TIME = 0.4;   //Number of seconds for a falcon to ramp from 0 -> 1
     public static double INPUT_CAP = 0.95;  //Max input value for a falcon
-    public static final double DRIVETRAIN_RADIUS_INCHES = 17.284903;
+    public static final double DRIVETRAIN_RADIUS_INCHES = 17.284903; //distance from the center of the robot to the center of the wheels in inches
+    public static final double MAX_WHEEL_VELOCITY = 20; //maximum wheel velocity in m/s
+
+    //odometry constants
+    public static final int[] ODOMETRY_WHEEL_LEFT_PORT = new int[] {-1, -1}; //dio pins for odometry wheel encoders
+    public static final int[] ODOMETRY_WHEEL_RIGHT_PORT = new int[] {-1, -1};
+    public static final int[] ODOMETRY_WHEEL_BACK_PORT = new int[] {-1, -1};
+
+    public static final boolean ODOMETRY_WHEEL_LEFT_REVERSED = false;
+    public static final boolean ODOMETRY_WHEEL_RIGHT_REVERSED = false;
+    public static final boolean ODOMETRY_WHEEL_BACK_REVERSED = false;
+
+    public static final double ODOMETRY_WHEEL_METERS_PER_PULSE = 1;
+
+    public static final double ODOMETRY_WHEEL_BACK_INCHES = 13.755204; //distance from the center of the robot to the center of the odometry wheels in inches
+    public static final double ODOMETRY_WHEEL_SIDE_INCHES = 12.876524; //left and right radii should be the same
 
     //Joystick port
     public final static int JOY_PORT = -1;
-  
-    //Intake subsystem
-    public final static int INTAKE_SOLENOID_PORT = -1;
 }

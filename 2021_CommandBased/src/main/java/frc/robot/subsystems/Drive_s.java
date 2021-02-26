@@ -1,26 +1,29 @@
 package frc.robot.subsystems;
 
+//wpilib imports
+import edu.wpi.first.wpilibj.geometry.Pose2d;
 import edu.wpi.first.wpilibj.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.geometry.Translation2d;
 import edu.wpi.first.wpilibj.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.util.Units;
-//First imports
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+
+//Motor control imports
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.InvertType;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
-//Motor control imports
 
-
-//Local file imports
+//Local imports
 import frc.robot.Constants;
 import frc.robot.util.XdriveKinematics;
+import frc.robot.util.XdriveOdometry;
 import frc.robot.util.XdriveWheelSpeeds;
 
 public class Drive_s extends SubsystemBase{
 
-    TalonFX talFL; // Creates motor objects
+    //create motor objects
+    TalonFX talFL;
     TalonFX talFR;
     TalonFX talBL;
     TalonFX talBR;
@@ -28,9 +31,8 @@ public class Drive_s extends SubsystemBase{
     //create kinematics
     XdriveKinematics kinematics;
 
-    /**
-     * Constructor
-    */ 
+    //create odometry
+    XdriveOdometry odometry;
     
     public Drive_s(){
         talFL = new TalonFX(Constants.TAL_FL_PORT);
@@ -58,6 +60,9 @@ public class Drive_s extends SubsystemBase{
                                           new Translation2d(Units.inchesToMeters(Constants.DRIVETRAIN_RADIUS_INCHES), new Rotation2d(1 * Math.PI / 4)),
                                           new Translation2d(Units.inchesToMeters(Constants.DRIVETRAIN_RADIUS_INCHES), new Rotation2d(5 * Math.PI / 4)),
                                           new Translation2d(Units.inchesToMeters(Constants.DRIVETRAIN_RADIUS_INCHES), new Rotation2d(7 * Math.PI / 4)));
+        
+        //initialize odometry
+        odometry = new XdriveOdometry();
     }
 
     /**
@@ -72,13 +77,20 @@ public class Drive_s extends SubsystemBase{
         talBR.set(ControlMode.PercentOutput, inputValues[3]);
     }
 
+    /**
+     * needs to be implemented, probably with PIDs and SimpleMotorFeedforwards
+     * 
+     * @param XdriveWheelSpeeds the target velocity of each wheel in meters/second
+     */
+    public void setWheelSpeeds(XdriveWheelSpeeds speeds) {
+
+    }
+
+    //this should probably get moved to the teleop command because auto will call setWheelSpeeds directly
     public void driveAndTurn(double vx, double vy, double omega) {
-        XdriveWheelSpeeds wheelSpeeds = kinematics.toWheelSpeeds(new ChassisSpeeds(vx, vy, omega));
-        wheelSpeeds.normalize(1.0);
-        setIndividual(new double[] {wheelSpeeds.frontLeftMetersPerSecond,
-                                    wheelSpeeds.frontRightMetersPerSecond,
-                                    wheelSpeeds.rearLeftMetersPerSecond,
-                                    wheelSpeeds.rearRightMetersPerSecond});
+        XdriveWheelSpeeds wheelSpeeds = kinematics.toWheelSpeeds(ChassisSpeeds.fromFieldRelativeSpeeds(vx, vy, omega, odometry.getPoseMeters().getRotation()));
+        wheelSpeeds.normalize(Constants.MAX_WHEEL_VELOCITY);
+        setWheelSpeeds(wheelSpeeds);
     }
 
     /**
@@ -97,11 +109,20 @@ public class Drive_s extends SubsystemBase{
 
     }
 
+    public Pose2d getPose() {
+        return odometry.getPoseMeters();
+    }
+
     public void setRotateDegree(double angle /*, Gyroscope reference*/){
 
     }
 
     public void setStop(){
         
+    }
+
+    @Override
+    public void periodic() {
+        odometry.update();
     }
 }
