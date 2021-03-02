@@ -355,7 +355,7 @@ public class XdriveTrajectoryCommand extends CommandBase {
            drive::getPose,
            drive.getKinematics(),
            Constants.X_PID_CONTROLLER,
-           Constants.X_PID_CONTROLLER,
+           Constants.Y_PID_CONTROLLER,
            Constants.THETA_PID_CONTROLLER,
            () -> trajectory.getStates().get(trajectory.getStates().size() - 1).poseMeters.getRotation(),
            Constants.MAX_WHEEL_VELOCITY,

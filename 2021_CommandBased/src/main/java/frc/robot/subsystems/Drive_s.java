@@ -83,6 +83,8 @@ public class Drive_s extends SubsystemBase{
      * @param XdriveWheelSpeeds the target velocity of each wheel in meters/second
      */
     public void setWheelSpeeds(XdriveWheelSpeeds speeds) {
+        double[] wheelSpeeds = {speeds.frontLeftMetersPerSecond/20, speeds.frontRightMetersPerSecond/20, speeds.rearLeftMetersPerSecond/20, speeds.rearRightMetersPerSecond/20};
+        setIndividual(wheelSpeeds);
 
     }
 
