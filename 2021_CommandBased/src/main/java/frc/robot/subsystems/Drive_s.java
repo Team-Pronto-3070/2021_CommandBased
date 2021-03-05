@@ -78,14 +78,16 @@ public class Drive_s extends SubsystemBase{
     }
 
     /**
-     * needs to be implemented, probably with PIDs and SimpleMotorFeedforwards
-     * 
+     * uses PIDs to set the target velocity of each wheel
+     *  
      * @param XdriveWheelSpeeds the target velocity of each wheel in meters/second
      */
     public void setWheelSpeeds(XdriveWheelSpeeds speeds) {
-        double[] wheelSpeeds = {speeds.frontLeftMetersPerSecond/20, speeds.frontRightMetersPerSecond/20, speeds.rearLeftMetersPerSecond/20, speeds.rearRightMetersPerSecond/20};
-        setIndividual(wheelSpeeds);
-
+        XdriveWheelSpeeds currentSpeeds = getWheelSpeeds();
+        setIndividual(new double[] {Constants.FL_PID.calculate(currentSpeeds.frontLeftMetersPerSecond, speeds.frontLeftMetersPerSecond) / Constants.MAX_WHEEL_VELOCITY,
+                                    Constants.FR_PID.calculate(currentSpeeds.frontRightMetersPerSecond, speeds.frontRightMetersPerSecond) / Constants.MAX_WHEEL_VELOCITY,
+                                    Constants.BL_PID.calculate(currentSpeeds.rearLeftMetersPerSecond, speeds.rearLeftMetersPerSecond) / Constants.MAX_WHEEL_VELOCITY,
+                                    Constants.BR_PID.calculate(currentSpeeds.rearRightMetersPerSecond, speeds.rearRightMetersPerSecond) / Constants.MAX_WHEEL_VELOCITY});
     }
 
     //this should probably get moved to the teleop command because auto will call setWheelSpeeds directly
@@ -117,6 +119,16 @@ public class Drive_s extends SubsystemBase{
 
     public XdriveKinematics getKinematics() {
         return kinematics;
+    }
+    
+
+    /**
+     * needs to be implemented
+     * 
+     * @return the current velocity of each wheel in m/s
+     */
+    public XdriveWheelSpeeds getWheelSpeeds() {
+
     }
 
     public void setRotateDegree(double angle /*, Gyroscope reference*/){
