@@ -24,7 +24,6 @@ public class AutoNavBarrelGroup extends SequentialCommandGroup {
         }
 
         addRequirements(drive);
-        addCommands(new XdriveTrajectoryCommand(trajectory, drive);
-        );
+        addCommands(new XdriveTrajectoryCommand(trajectory, drive));
     }
 }
