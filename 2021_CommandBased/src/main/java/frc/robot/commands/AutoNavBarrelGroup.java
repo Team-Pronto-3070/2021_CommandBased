@@ -14,13 +14,13 @@ import frc.robot.subsystems.Drive_s;
 public class AutoNavBarrelGroup extends SequentialCommandGroup {
     
     public AutoNavBarrelGroup(Drive_s drive) {
-        String trajectoryJSON = "paths/BarrelPath.wpilib.json";
+        String JSONPath = "paths/BarrelPath.wpilib.json";
         Trajectory trajectory = new Trajectory();
         try {
-            Path trajectoryPath = Filesystem.getDeployDirectory().toPath().resolve(trajectoryJSON);
+            Path trajectoryPath = Filesystem.getDeployDirectory().toPath().resolve(JSONPath);
             trajectory = TrajectoryUtil.fromPathweaverJson(trajectoryPath);
         } catch (IOException ex) {
-            DriverStation.reportError("Unable to open trajectory: " + trajectoryJSON, ex.getStackTrace());
+            DriverStation.reportError("Unable to open trajectory: " + JSONPath, ex.getStackTrace());
         }
 
         addRequirements(drive);

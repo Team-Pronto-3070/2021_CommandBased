@@ -131,10 +131,6 @@ public class Drive_s extends SubsystemBase{
 
     }
 
-    public void setRotateDegree(double angle /*, Gyroscope reference*/){
-
-    }
-
     /**
      * Stops the motors when called
      */
