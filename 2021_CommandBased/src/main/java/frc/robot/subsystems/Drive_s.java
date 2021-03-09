@@ -135,8 +135,15 @@ public class Drive_s extends SubsystemBase{
 
     }
 
+    /**
+     * Stops the motors when called
+     */
     public void setStop(){
-        
+        talFL.set(ControlMode.PercentOutput, 0); // Stops the left motors
+        talBL.set(ControlMode.PercentOutput, 0);
+
+        talFR.set(ControlMode.PercentOutput, 0); // Stops the right motors
+        talBR.set(ControlMode.PercentOutput, 0);
     }
 
     @Override
