@@ -4,6 +4,11 @@
 
 package frc.robot;
 
+import edu.wpi.first.wpilibj.controller.PIDController;
+import edu.wpi.first.wpilibj.controller.ProfiledPIDController;
+import edu.wpi.first.wpilibj.trajectory.TrapezoidProfile;
+
+
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
  * constants. This class should not be used for any other purpose. All constants should be declared
@@ -26,9 +31,21 @@ public final class Constants {
     //Drive Subsystem Constants
     public static double RAMP_TIME = 0.4;   //Number of seconds for a falcon to ramp from 0 -> 1
     public static double INPUT_CAP = 0.95;  //Max input value for a falcon
-    public static final double DRIVETRAIN_RADIUS_INCHES = 17.284903; //distance from the center of the robot to the center of the wheels in inches
-    public static final double MAX_WHEEL_VELOCITY = 20; //maximum wheel velocity in m/s
 
+    public static final double DRIVETRAIN_RADIUS_INCHES = 17.284903; //distance from the center of the robot to the center of the wheels in inches
+    public static final double MAX_WHEEL_VELOCITY = 5; //maximum wheel velocity in m/s
+    public static final double MAX_ANGULAR_VELOCITY = 10; //in radians/second
+    public static final double MAX_ANGULAR_ACCELERATION = 3; //in radians/second^2
+
+    public static final PIDController X_PID_CONTROLLER = new PIDController(1, 0, 0);
+    public static final PIDController Y_PID_CONTROLLER = new PIDController(1, 0, 0);
+    public static final ProfiledPIDController THETA_PID_CONTROLLER = new ProfiledPIDController(1, 0, 0, new TrapezoidProfile.Constraints(MAX_ANGULAR_VELOCITY, MAX_ANGULAR_ACCELERATION));
+
+    public static final PIDController FL_PID = new PIDController(1, 0, 0);
+    public static final PIDController FR_PID = new PIDController(1, 0, 0);
+    public static final PIDController BL_PID = new PIDController(1, 0, 0);
+    public static final PIDController BR_PID = new PIDController(1, 0, 0);
+    
     //odometry constants
     public static final int[] ODOMETRY_WHEEL_LEFT_PORT = new int[] {-1, -1}; //dio pins for odometry wheel encoders
     public static final int[] ODOMETRY_WHEEL_RIGHT_PORT = new int[] {-1, -1};
