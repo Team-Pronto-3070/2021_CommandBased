@@ -9,16 +9,17 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 
 import frc.robot.commands.AutoNavBarrelGroup;
 import frc.robot.commands.AutoNavBounceGroup;
 import frc.robot.commands.AutoNavSlalomGroup;
 import frc.robot.commands.GalacticSearchGroup;
 
+import frc.robot.commands.TeleGroup;
+
 import frc.robot.subsystems.Drive_s;
 import frc.robot.subsystems.Intake_s;
-
-import frc.robot.OI;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -27,6 +28,10 @@ import frc.robot.OI;
  * subsystems, commands, and button mappings) should be declared here.
  */
 public class RobotContainer {
+  
+  //Define OI object
+  public static OI oi = new OI();
+  
   // define subsystems
   private final Drive_s m_drive = new Drive_s();
   private final Intake_s m_intake = new Intake_s();
@@ -37,10 +42,11 @@ public class RobotContainer {
   private final Command m_autoNavSlalomGroup = new AutoNavSlalomGroup(m_drive);
   private final Command m_galacticSearchGroup = new GalacticSearchGroup(m_drive, m_intake);
 
+  private final Command m_teleopGroup = new TeleGroup(m_drive);
+
   //define a sendable chooser to select the autonomous command
   SendableChooser<Command> autoCommandChooser = new SendableChooser<Command>();
 
-  OI oi = new OI();
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -74,7 +80,8 @@ public class RobotContainer {
 
 
     // Referencing the added buttons when pressed
-    
+    oi.getButton("REPLACE_ME").whileHeld(new InstantCommand(() -> m_intake.set(Constants.IN_SPEED), m_intake), true);
+    oi.getButton("REPLACE_ME").whileHeld(new InstantCommand(() -> m_intake.set(Constants.OUT_SPEED), m_intake), true);
   }
 
   /**
@@ -85,5 +92,9 @@ public class RobotContainer {
   public Command getAutonomousCommand() {
     // An ExampleCommand will run in autonomous
     return autoCommandChooser.getSelected();
+  }
+
+  public Command getTeleopCommand(){
+    return 
   }
 }

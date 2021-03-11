@@ -28,15 +28,20 @@ public final class Constants {
     //Intake Talon Ports
     public final static int TAL_INTAKE_PORT = -1;
 
+    //Intake speed constants
+    public static final double IN_SPEED = 0.5;
+    public static final double OUT_SPEED = -0.5;
+
     //Drive Subsystem Constants
-    public static double RAMP_TIME = 0.4;   //Number of seconds for a falcon to ramp from 0 -> 1
-    public static double INPUT_CAP = 0.95;  //Max input value for a falcon
+    public static final double RAMP_TIME = 0.4;   //Number of seconds for a falcon to ramp from 0 -> 1
+    public static final double INPUT_CAP = 0.95;  //Max input value for a falcon
 
     public static final double DRIVETRAIN_RADIUS_INCHES = 17.284903; //distance from the center of the robot to the center of the wheels in inches
     public static final double MAX_WHEEL_VELOCITY = 5; //maximum wheel velocity in m/s
     public static final double MAX_ANGULAR_VELOCITY = 10; //in radians/second
     public static final double MAX_ANGULAR_ACCELERATION = 3; //in radians/second^2
 
+    //PID Constants
     public static final PIDController X_PID_CONTROLLER = new PIDController(1, 0, 0);
     public static final PIDController Y_PID_CONTROLLER = new PIDController(1, 0, 0);
     public static final ProfiledPIDController THETA_PID_CONTROLLER = new ProfiledPIDController(1, 0, 0, new TrapezoidProfile.Constraints(MAX_ANGULAR_VELOCITY, MAX_ANGULAR_ACCELERATION));

@@ -13,7 +13,7 @@ public class Intake_s extends SubsystemBase{
  
 
     public Intake_s(){
-        talIN = new TalonSRX(Constants.p_TAL_IN);
+        talIN = new TalonSRX(Constants.TAL_INTAKE_PORT);
        // talIN.setInverted(true);
     }
 
