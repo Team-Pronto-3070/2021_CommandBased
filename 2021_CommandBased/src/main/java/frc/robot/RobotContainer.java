@@ -78,10 +78,10 @@ public class RobotContainer {
     oi.addButton("btn4", 4);
     oi.addButton("btn5", 5);
 
-
     // Referencing the added buttons when pressed
     oi.getButton("REPLACE_ME").whileHeld(new InstantCommand(() -> m_intake.set(Constants.IN_SPEED), m_intake), true);
     oi.getButton("REPLACE_ME").whileHeld(new InstantCommand(() -> m_intake.set(Constants.OUT_SPEED), m_intake), true);
+
   }
 
   /**
@@ -90,11 +90,10 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    // An ExampleCommand will run in autonomous
     return autoCommandChooser.getSelected();
   }
 
   public Command getTeleopCommand(){
-    return 
+    return m_teleopGroup;
   }
 }

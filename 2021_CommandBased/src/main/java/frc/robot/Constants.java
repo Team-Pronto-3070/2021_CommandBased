@@ -67,4 +67,7 @@ public final class Constants {
 
     //Joystick port
     public final static int JOY_PORT = -1;
+
+    //Intake speed
+    public final static double INTAKE_SPEED = 0.0;
 }
