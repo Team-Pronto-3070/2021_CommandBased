@@ -55,6 +55,11 @@ public class Drive_s extends SubsystemBase{
         talFR.configOpenloopRamp(Constants.RAMP_TIME);
         talBR.configOpenloopRamp(Constants.RAMP_TIME);
 
+        talFL.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor);
+		talFR.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor);
+		talBL.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor);
+		talBR.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor);
+
         //initialize kinematics
         kinematics = new XdriveKinematics(new Translation2d(Units.inchesToMeters(Constants.DRIVETRAIN_RADIUS_INCHES), new Rotation2d(3 * Math.PI / 4)),
                                           new Translation2d(Units.inchesToMeters(Constants.DRIVETRAIN_RADIUS_INCHES), new Rotation2d(1 * Math.PI / 4)),
@@ -128,10 +133,6 @@ public class Drive_s extends SubsystemBase{
      * @return the current velocity of each wheel in m/s
      */
     public XdriveWheelSpeeds getWheelSpeeds() {
-
-    }
-
-    public void setRotateDegree(double angle /*, Gyroscope reference*/){
 
     }
 
