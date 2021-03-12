@@ -363,6 +363,10 @@ public class XdriveTrajectoryCommand extends CommandBase {
            drive);
   }
 
+  public XdriveTrajectoryCommand(String path, Drive_s drive) {
+    this(drive.trajectoryFromJSON(path), drive);
+  }
+
   @Override
   public void initialize() {
     var initialState = m_trajectory.sample(0);

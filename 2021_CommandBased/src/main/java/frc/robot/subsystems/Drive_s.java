@@ -1,12 +1,19 @@
 package frc.robot.subsystems;
 
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Filesystem;
 //wpilib imports
 import edu.wpi.first.wpilibj.geometry.Pose2d;
 import edu.wpi.first.wpilibj.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.geometry.Translation2d;
 import edu.wpi.first.wpilibj.kinematics.ChassisSpeeds;
+import edu.wpi.first.wpilibj.trajectory.Trajectory;
+import edu.wpi.first.wpilibj.trajectory.TrajectoryUtil;
 import edu.wpi.first.wpilibj.util.Units;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+
+import java.io.IOException;
+import java.nio.file.Path;
 
 //Motor control imports
 import com.ctre.phoenix.motorcontrol.ControlMode;
@@ -124,6 +131,14 @@ public class Drive_s extends SubsystemBase{
         return odometry.getPoseMeters();
     }
 
+    public void resetOdometry(Pose2d pose) {
+        odometry.resetPosition(pose);
+    }
+
+    public void resetOdometry() {
+        odometry.resetPosition(new Pose2d());
+    }
+
     public XdriveKinematics getKinematics() {
         return kinematics;
     }
@@ -147,6 +162,17 @@ public class Drive_s extends SubsystemBase{
 
         talFR.set(ControlMode.PercentOutput, 0); // Stops the right motors
         talBR.set(ControlMode.PercentOutput, 0);
+    }
+
+    public Trajectory trajectoryFromJSON(String JSONPath) {
+        Trajectory trajectory = new Trajectory();
+        try {
+            Path trajectoryPath = Filesystem.getDeployDirectory().toPath().resolve(JSONPath);
+            trajectory = TrajectoryUtil.fromPathweaverJson(trajectoryPath);
+        } catch (IOException ex) {
+            DriverStation.reportError("Unable to open trajectory: " + JSONPath, ex.getStackTrace());
+        }
+        return trajectory;
     }
 
     @Override

@@ -4,20 +4,25 @@
 
 package frc.robot;
 
+import java.util.Map;
+
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
+import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj2.command.SelectCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 
-import frc.robot.commands.AutoNavBarrelGroup;
-import frc.robot.commands.AutoNavBounceGroup;
-import frc.robot.commands.AutoNavSlalomGroup;
-import frc.robot.commands.GalacticSearchGroup;
+import frc.robot.commands.TeleGroup;
+import frc.robot.commands.XdriveTrajectoryCommand;
 
 import frc.robot.OI;
-import frc.robot.commands.TeleGroup;
 
 import frc.robot.subsystems.Drive_s;
 import frc.robot.subsystems.Intake_s;
@@ -36,18 +41,11 @@ public class RobotContainer {
   // define subsystems
   private final Drive_s m_drive = new Drive_s();
   private final Intake_s m_intake = new Intake_s();
-
-  // define commands
-  private final Command m_autoNavBarrelGroup = new AutoNavBarrelGroup(m_drive);
-  private final Command m_autoNavBounceGroup = new AutoNavBounceGroup(m_drive);
-  private final Command m_autoNavSlalomGroup = new AutoNavSlalomGroup(m_drive);
-  private final Command m_galacticSearchGroup = new GalacticSearchGroup(m_drive, m_intake);
-
-  private final Command m_teleopGroup = new TeleGroup(m_drive, oi);
+  
+  private enum autoOptions {BARREL, BOUNCE, SLALOM, GALACTICSEARCH}
 
   //define a sendable chooser to select the autonomous command
-  SendableChooser<Command> autoCommandChooser = new SendableChooser<Command>();
-
+  SendableChooser<autoOptions> autoChooser = new SendableChooser<autoOptions>();
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -55,14 +53,16 @@ public class RobotContainer {
     configureButtonBindings();
 
     //add options to the chooser
-    autoCommandChooser.setDefaultOption("None", null);
-    autoCommandChooser.addOption("Auto Nav - Barrel path", m_autoNavBarrelGroup);
-    autoCommandChooser.addOption("Auto Nav - Bounce path", m_autoNavBounceGroup);
-    autoCommandChooser.addOption("Auto Nav - Slalom path", m_autoNavSlalomGroup);
-    autoCommandChooser.addOption("Galactic Search", m_galacticSearchGroup);
+    autoChooser.setDefaultOption("None", null);
+    autoChooser.addOption("Auto Nav - Barrel path", autoOptions.BARREL);
+    autoChooser.addOption("Auto Nav - Bounce path", autoOptions.BOUNCE);
+    autoChooser.addOption("Auto Nav - Slalom path", autoOptions.SLALOM);
+    autoChooser.addOption("Galactic Search", autoOptions.GALACTICSEARCH);
 
     //put the chooser on the dashboard
-    SmartDashboard.putData(autoCommandChooser);
+    SmartDashboard.putData(autoChooser);
+
+    m_drive.setDefaultCommand(new TeleGroup(m_drive, oi));
   }
 
   /**
@@ -83,6 +83,17 @@ public class RobotContainer {
     oi.getButton("REPLACE_ME").whileHeld(new InstantCommand(() -> m_intake.set(Constants.IN_SPEED), m_intake), true);
     oi.getButton("REPLACE_ME").whileHeld(new InstantCommand(() -> m_intake.set(Constants.OUT_SPEED), m_intake), true);
 
+    //when pressed, initialize odometry and move to starting location for autonomous
+    oi.getButton("REPLACE_ME").whenPressed(new SequentialCommandGroup(
+                                                new InstantCommand(() -> m_drive.resetOdometry(Constants.INITIAL_POSE), m_drive),
+                                                new SelectCommand(Map.ofEntries(
+                                                                      Map.entry(autoOptions.BARREL, new XdriveTrajectoryCommand("paths/BarrelInit.wpilib.json", m_drive)),
+                                                                      Map.entry(autoOptions.BOUNCE, new XdriveTrajectoryCommand("paths/BounceInit.wpilib.json", m_drive)),
+                                                                      Map.entry(autoOptions.SLALOM, new XdriveTrajectoryCommand("paths/SlalomInit.wpilib.json", m_drive)),
+                                                                      Map.entry(autoOptions.GALACTICSEARCH, new XdriveTrajectoryCommand("paths/GalacticSearchInit.wpilib.json", m_drive))),
+                                                                  autoChooser::getSelected)));
+    //when pressed, run autonomous
+    oi.getButton("REPLACE_ME").whenPressed(new SelectCommand(this::getAutonomousCommand));
   }
 
   /**
@@ -91,10 +102,18 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    return autoCommandChooser.getSelected();
-  }
-
-  public Command getTeleopCommand(){
-    return m_teleopGroup;
+    return new SelectCommand(Map.ofEntries(
+                              Map.entry(autoOptions.BARREL, new XdriveTrajectoryCommand("paths/BarrelPath.wpilib.json", m_drive)),
+                              Map.entry(autoOptions.BOUNCE, new XdriveTrajectoryCommand("paths/BouncePath.wpilib.json", m_drive)),
+                              Map.entry(autoOptions.SLALOM, new XdriveTrajectoryCommand("paths/SlalomPath.wpilib.json", m_drive)),
+                              Map.entry(autoOptions.GALACTICSEARCH, new ParallelDeadlineGroup(
+                                                                      new SelectCommand(Map.ofEntries(
+                                                                                          Map.entry("aRed", new XdriveTrajectoryCommand("paths/aRed.wpilib.json", m_drive)),
+                                                                                          Map.entry("bRed", new XdriveTrajectoryCommand("paths/bRed.wpilib.json", m_drive)),
+                                                                                          Map.entry("aBlue", new XdriveTrajectoryCommand("paths/aBlue.wpilib.json", m_drive)),
+                                                                                          Map.entry("bBlue", new XdriveTrajectoryCommand("paths/bBlue.wpilib.json", m_drive))),
+                                                                                        () -> NetworkTableInstance.getDefault().getTable("vision").getEntry("galacticSearchPath").getString("none")),
+                                                                      new RunCommand(() -> m_intake.set(Constants.IN_SPEED), m_intake)))),
+                            autoChooser::getSelected);
   }
 }
