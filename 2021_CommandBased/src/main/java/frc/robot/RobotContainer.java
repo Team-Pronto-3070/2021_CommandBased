@@ -16,6 +16,7 @@ import frc.robot.commands.AutoNavBounceGroup;
 import frc.robot.commands.AutoNavSlalomGroup;
 import frc.robot.commands.GalacticSearchGroup;
 
+import frc.robot.OI;
 import frc.robot.commands.TeleGroup;
 
 import frc.robot.subsystems.Drive_s;
@@ -30,7 +31,7 @@ import frc.robot.subsystems.Intake_s;
 public class RobotContainer {
   
   //Define OI object
-  public static OI oi = new OI();
+  public OI oi = new OI();
   
   // define subsystems
   private final Drive_s m_drive = new Drive_s();
@@ -42,7 +43,7 @@ public class RobotContainer {
   private final Command m_autoNavSlalomGroup = new AutoNavSlalomGroup(m_drive);
   private final Command m_galacticSearchGroup = new GalacticSearchGroup(m_drive, m_intake);
 
-  private final Command m_teleopGroup = new TeleGroup(m_drive);
+  private final Command m_teleopGroup = new TeleGroup(m_drive, oi);
 
   //define a sendable chooser to select the autonomous command
   SendableChooser<Command> autoCommandChooser = new SendableChooser<Command>();
