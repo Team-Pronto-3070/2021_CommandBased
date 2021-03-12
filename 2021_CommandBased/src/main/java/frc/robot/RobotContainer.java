@@ -73,8 +73,12 @@ public class RobotContainer {
     oi.addButton("btn5", 5);
 
 
-    // Referencing the added buttons when pressed
-    
+    // Referencing the added buttons when pressed 
+    /**
+     * runs the intake, INTAKE_SPEED is in constants
+     */
+    oi.getButton("btn1")
+      .whileHeld(()-> Intake_s.set(INTAKE_SPEED));
   }
 
   /**
