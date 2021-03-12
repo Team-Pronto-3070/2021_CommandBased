@@ -11,11 +11,11 @@ import edu.wpi.first.wpilibj.Joystick;
 public class TeleGroup extends ParallelCommandGroup{
 
     OI oi;
-    Joystick controller = oi.getController();
+    Joystick controller;
 
     public TeleGroup(Drive_s drive, OI oi){
-       this.oi = oi;
-
+        this.oi = oi;
+        controller = oi.getController();
         addRequirements(drive);
     }
 
