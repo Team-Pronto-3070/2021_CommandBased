@@ -8,6 +8,7 @@ import java.util.Map;
 
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.GenericHID;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -34,7 +35,7 @@ import frc.robot.subsystems.Intake_s;
  * subsystems, commands, and button mappings) should be declared here.
  */
 public class RobotContainer {
-  
+
   //Define OI object
   public OI oi = new OI();
   
@@ -45,13 +46,13 @@ public class RobotContainer {
   private enum autoOptions {BARREL, BOUNCE, SLALOM, GALACTICSEARCH}
 
   //define a sendable chooser to select the autonomous command
-  SendableChooser<autoOptions> autoChooser = new SendableChooser<autoOptions>();
+  private SendableChooser<autoOptions> autoChooser = new SendableChooser<autoOptions>();
+
+  private Timer timer = new Timer();
+  private double startTime;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
-    // Configure the button bindings
-    configureButtonBindings();
-
     //add options to the chooser
     autoChooser.setDefaultOption("None", null);
     autoChooser.addOption("Auto Nav - Barrel path", autoOptions.BARREL);
@@ -63,6 +64,9 @@ public class RobotContainer {
     SmartDashboard.putData(autoChooser);
 
     m_drive.setDefaultCommand(new TeleGroup(m_drive, oi));
+
+    // Configure the button bindings
+    configureButtonBindings();
   }
 
   /**
@@ -85,15 +89,19 @@ public class RobotContainer {
 
     //when pressed, initialize odometry and move to starting location for autonomous
     oi.getButton("REPLACE_ME").whenPressed(new SequentialCommandGroup(
-                                                new InstantCommand(() -> m_drive.resetOdometry(Constants.INITIAL_POSE), m_drive),
-                                                new SelectCommand(Map.ofEntries(
-                                                                      Map.entry(autoOptions.BARREL, new XdriveTrajectoryCommand("paths/BarrelInit.wpilib.json", m_drive)),
-                                                                      Map.entry(autoOptions.BOUNCE, new XdriveTrajectoryCommand("paths/BounceInit.wpilib.json", m_drive)),
-                                                                      Map.entry(autoOptions.SLALOM, new XdriveTrajectoryCommand("paths/SlalomInit.wpilib.json", m_drive)),
-                                                                      Map.entry(autoOptions.GALACTICSEARCH, new XdriveTrajectoryCommand("paths/GalacticSearchInit.wpilib.json", m_drive))),
-                                                                  autoChooser::getSelected)));
-    //when pressed, run autonomous
-    oi.getButton("REPLACE_ME").whenPressed(new SelectCommand(this::getAutonomousCommand));
+                                              new InstantCommand(() -> m_drive.resetOdometry(Constants.INITIAL_POSE), m_drive),
+                                              new SelectCommand(Map.ofEntries(
+                                                                    Map.entry(autoOptions.BARREL, new XdriveTrajectoryCommand("paths/BarrelInit.wpilib.json", m_drive)),
+                                                                    Map.entry(autoOptions.BOUNCE, new XdriveTrajectoryCommand("paths/BounceInit.wpilib.json", m_drive)),
+                                                                    Map.entry(autoOptions.SLALOM, new XdriveTrajectoryCommand("paths/SlalomInit.wpilib.json", m_drive)),
+                                                                    Map.entry(autoOptions.GALACTICSEARCH, new XdriveTrajectoryCommand("paths/GalacticSearchInit.wpilib.json", m_drive))),
+                                                                autoChooser::getSelected)));
+    //when pressed, run autonomous with a timer
+    oi.getButton("REPLACE_ME").whenPressed(new SequentialCommandGroup(
+                                              new InstantCommand(() -> startTime = timer.get()),
+                                              new ParallelDeadlineGroup(
+                                                  new SelectCommand(this::getAutonomousCommand),
+                                                  new RunCommand(() -> SmartDashboard.putNumber("Autonomous Time", timer.get() - startTime)))));
   }
 
   /**
