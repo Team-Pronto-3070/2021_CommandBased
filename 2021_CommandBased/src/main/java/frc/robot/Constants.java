@@ -6,6 +6,8 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj.controller.PIDController;
 import edu.wpi.first.wpilibj.controller.ProfiledPIDController;
+import edu.wpi.first.wpilibj.geometry.Pose2d;
+import edu.wpi.first.wpilibj.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.trajectory.TrapezoidProfile;
 
 
@@ -64,6 +66,9 @@ public final class Constants {
 
     public static final double ODOMETRY_WHEEL_BACK_INCHES = 13.755204; //distance from the center of the robot to the center of the odometry wheels in inches
     public static final double ODOMETRY_WHEEL_SIDE_INCHES = 12.876524; //left and right radii should be the same
+
+    //autonomous constants
+    public static final Pose2d INITIAL_POSE = new Pose2d(0, 0, new Rotation2d(0));
 
     //Joystick port
     public final static int JOY_PORT = -1;
