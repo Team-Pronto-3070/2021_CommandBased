@@ -45,4 +45,11 @@ public final class Constants {
 
     //Joystick port
     public final static int JOY_PORT = -1;
+
+    //Teleop Command Constants
+    public static double JOY_STICK_VX_DEADZONE = 5;
+    public static double JOY_STICK_VY_DEADZONE = 5;
+    public static double JOY_STICK_OMEGA_DEADZONE = 5;
+    
+
 }
