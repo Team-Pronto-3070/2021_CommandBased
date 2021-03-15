@@ -68,6 +68,13 @@ public final class Constants {
     //Joystick port
     public final static int JOY_PORT = -1;
 
-    //Intake speed
-    public final static double INTAKE_SPEED = 0.0;
+    //Joystick Deadzone Constants
+    public static final double JOY_STICK_VX_DEADZONE = 0.1;
+    public static final double JOY_STICK_VY_DEADZONE = 0.1;
+    public static final double JOY_STICK_OMEGA_DEADZONE = 0.1;
+    
+    //Joystick Coefficent Constants
+    public static final double VX_COEFFICENT = 5;
+    public static final double VY_COEFFICENT = 5;
+    public static final double OMEGA_COEFFICENT = 5;
 }
