@@ -4,8 +4,6 @@ package frc.robot;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 
-import frc.robot.Constants;
-
 import java.util.HashMap;
 
 /**
@@ -16,7 +14,7 @@ import java.util.HashMap;
 public class OI
 {
     /* Class Variable Declaration */
-    HashMap<String, Joystick> joyMap;
+    public HashMap<String, Joystick> joyMap;
     HashMap<String, JoystickButton> buttons;
     
     Joystick joystick;

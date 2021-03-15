@@ -15,9 +15,12 @@ import edu.wpi.first.wpilibj.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.trajectory.Trajectory;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.Subsystem;
+
 import frc.robot.util.XdriveKinematics;
 import frc.robot.util.XdriveMotorVoltages;
 import frc.robot.util.XdriveWheelSpeeds;
+import frc.robot.subsystems.Drive_s;
+import frc.robot.Constants;
 
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -300,6 +303,64 @@ public class XdriveTrajectoryCommand extends CommandBase {
         maxWheelVelocityMetersPerSecond,
         outputWheelSpeeds,
         requirements);
+  }
+
+  /**
+   * Constructs a new XdriveControllerCommand that when executed will follow the provided
+   * trajectory. The user should implement a velocity PID on the desired output wheel velocities.
+   *
+   * <p>Note: The controllers will *not* set the outputVolts to zero upon completion of the path -
+   * this is left to the user, since it is not appropriate for paths with non-stationary end-states.
+   *
+   * @param trajectory The trajectory to follow.
+   * @param desiredRotation The angle that the robot should be facing. This is sampled at each time
+   *     step.
+   * @param drive The instance of the drive subsystem.
+   */
+  public XdriveTrajectoryCommand(
+      Trajectory trajectory,
+      Supplier<Rotation2d> desiredRotation,
+      Drive_s drive) {
+        this(trajectory,
+             drive::getPose,
+             drive.getKinematics(),
+             Constants.X_PID_CONTROLLER,
+             Constants.X_PID_CONTROLLER,
+             Constants.THETA_PID_CONTROLLER,
+             desiredRotation,
+             Constants.MAX_WHEEL_VELOCITY,
+             drive::setWheelSpeeds,
+             drive);
+      }
+
+  /**
+   * Constructs a new XdriveControllerCommand that when executed will follow the provided
+   * trajectory. The user should implement a velocity PID on the desired output wheel velocities.
+   *
+   * <p>Note: The controllers will *not* set the outputVolts to zero upon completion of the path -
+   * this is left to the user, since it is not appropriate for paths with non-stationary end-states.
+   *
+   * <p>Note 2: The final rotation of the robot will be set to the rotation of the final pose in the
+   * trajectory. The robot will not follow the rotations from the poses at each timestep. If
+   * alternate rotation behavior is desired, the other constructor with a supplier for rotation
+   * should be used.
+   *
+   * @param trajectory The trajectory to follow.
+   * @param drive The instance of the drive subsystem.
+   */
+  public XdriveTrajectoryCommand(
+    Trajectory trajectory,
+    Drive_s drive) {
+      this(trajectory,
+           drive::getPose,
+           drive.getKinematics(),
+           Constants.X_PID_CONTROLLER,
+           Constants.Y_PID_CONTROLLER,
+           Constants.THETA_PID_CONTROLLER,
+           () -> trajectory.getStates().get(trajectory.getStates().size() - 1).poseMeters.getRotation(),
+           Constants.MAX_WHEEL_VELOCITY,
+           drive::setWheelSpeeds,
+           drive);
   }
 
   @Override
