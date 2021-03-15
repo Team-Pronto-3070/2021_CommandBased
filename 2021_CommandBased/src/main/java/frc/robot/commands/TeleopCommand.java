@@ -33,9 +33,9 @@ public class TeleopCommand extends CommandBase{
   @Override
   public void execute() {
     //Sets deadzones for the joystick values
-    vx = (Math.abs(_oi.getX()) < Constants.JOY_STICK_VX_DEADZONE) ? 0 : _oi.getX();
-    vy = (Math.abs(_oi.getY()) < Constants.JOY_STICK_VY_DEADZONE) ? 0 : _oi.getY();
-    omega = (Math.abs(_oi.getTheta()) < Constants.JOY_STICK_OMEGA_DEADZONE) ? 0 : _oi.getTheta();
+    vx = (Math.abs(_oi.getX()) < Constants.JOY_STICK_VX_DEADZONE) ? 0 : _oi.getX() * Constants.VX_COEFFICENT;
+    vy = (Math.abs(_oi.getY()) < Constants.JOY_STICK_VY_DEADZONE) ? 0 : _oi.getY() * Constants.VY_COEFFICENT;
+    omega = (Math.abs(_oi.getTheta()) < Constants.JOY_STICK_OMEGA_DEADZONE) ? 0 : _oi.getTheta() * Constants.OMEGA_COEFFICENT;
 
     //Sets wheel speeds according to joystick values
     XdriveWheelSpeeds wheelSpeeds = _drive.getKinematics().toWheelSpeeds(ChassisSpeeds.fromFieldRelativeSpeeds(vx, vy, omega, _drive.getPose().getRotation()));
