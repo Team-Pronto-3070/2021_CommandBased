@@ -20,10 +20,8 @@ import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SelectCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 
-import frc.robot.commands.TeleGroup;
+import frc.robot.commands.TeleopCommand;
 import frc.robot.commands.XdriveTrajectoryCommand;
-
-import frc.robot.OI;
 
 import frc.robot.subsystems.Drive_s;
 import frc.robot.subsystems.Intake_s;
@@ -63,7 +61,7 @@ public class RobotContainer {
     //put the chooser on the dashboard
     SmartDashboard.putData(autoChooser);
 
-    m_drive.setDefaultCommand(new TeleGroup(m_drive, oi));
+    m_drive.setDefaultCommand(new TeleopCommand(m_drive, oi));
 
     // Configure the button bindings
     configureButtonBindings();
