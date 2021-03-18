@@ -2,7 +2,6 @@ package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
-//wpilib imports
 import edu.wpi.first.wpilibj.geometry.Pose2d;
 import edu.wpi.first.wpilibj.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.geometry.Translation2d;
@@ -15,13 +14,11 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.io.IOException;
 import java.nio.file.Path;
 
-//Motor control imports
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.InvertType;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
 
-//Local imports
 import frc.robot.Constants;
 import frc.robot.util.XdriveKinematics;
 import frc.robot.util.XdriveOdometry;
@@ -62,14 +59,12 @@ public class Drive_s extends SubsystemBase{
         talFR.configOpenloopRamp(Constants.RAMP_TIME);
         talBR.configOpenloopRamp(Constants.RAMP_TIME);
 
-
-        //initialize kinematics with relative locations of wheels
-
         talFL.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor);
 		talFR.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor);
 		talBL.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor);
 		talBR.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor);
 
+        //initialize kinematics with relative locations of wheels
         kinematics = new XdriveKinematics(new Translation2d(Units.inchesToMeters(Constants.DRIVETRAIN_RADIUS_INCHES), new Rotation2d(3 * Math.PI / 4)),
                                           new Translation2d(Units.inchesToMeters(Constants.DRIVETRAIN_RADIUS_INCHES), new Rotation2d(1 * Math.PI / 4)),
                                           new Translation2d(Units.inchesToMeters(Constants.DRIVETRAIN_RADIUS_INCHES), new Rotation2d(5 * Math.PI / 4)),
@@ -91,25 +86,25 @@ public class Drive_s extends SubsystemBase{
         talBR.set(ControlMode.PercentOutput, inputValues[3]);
     }
 
+    public void setIndividual(XdriveWheelSpeeds values) {
+        setIndividual(new double[] {values.frontLeftMetersPerSecond,
+                                    values.frontRightMetersPerSecond,
+                                    values.rearLeftMetersPerSecond,
+                                    values.rearRightMetersPerSecond});
+    }
+
     /**
      * uses PIDs to set the target velocity of each wheel
      *  
      * @param XdriveWheelSpeeds the target velocity of each wheel in meters/second
      */
-    public void setWheelSpeeds(XdriveWheelSpeeds speeds) {
-        XdriveWheelSpeeds currentSpeeds = getWheelSpeeds();
-        setIndividual(new double[] {Constants.FL_PID.calculate(currentSpeeds.frontLeftMetersPerSecond, speeds.frontLeftMetersPerSecond) / Constants.MAX_WHEEL_VELOCITY,
-                                    Constants.FR_PID.calculate(currentSpeeds.frontRightMetersPerSecond, speeds.frontRightMetersPerSecond) / Constants.MAX_WHEEL_VELOCITY,
-                                    Constants.BL_PID.calculate(currentSpeeds.rearLeftMetersPerSecond, speeds.rearLeftMetersPerSecond) / Constants.MAX_WHEEL_VELOCITY,
-                                    Constants.BR_PID.calculate(currentSpeeds.rearRightMetersPerSecond, speeds.rearRightMetersPerSecond) / Constants.MAX_WHEEL_VELOCITY});
-    }
-
-    //this should probably get moved to the teleop command because auto will call setWheelSpeeds directly
-    public void driveAndTurn(double vx, double vy, double omega) {
-        XdriveWheelSpeeds wheelSpeeds = kinematics.toWheelSpeeds(ChassisSpeeds.fromFieldRelativeSpeeds(vx, vy, omega, odometry.getPoseMeters().getRotation()));
-        wheelSpeeds.normalize(Constants.MAX_WHEEL_VELOCITY);
-        setWheelSpeeds(wheelSpeeds);
-    }
+//    public void setWheelSpeeds(XdriveWheelSpeeds speeds) {
+//        XdriveWheelSpeeds currentSpeeds = getWheelSpeeds();
+//        setIndividual(new XdriveWheelSpeeds(Constants.FL_PID.calculate(currentSpeeds.frontLeftMetersPerSecond, speeds.frontLeftMetersPerSecond) / Constants.MAX_WHEEL_VELOCITY,
+//                                            Constants.FR_PID.calculate(currentSpeeds.frontRightMetersPerSecond, speeds.frontRightMetersPerSecond) / Constants.MAX_WHEEL_VELOCITY,
+//                                            Constants.BL_PID.calculate(currentSpeeds.rearLeftMetersPerSecond, speeds.rearLeftMetersPerSecond) / Constants.MAX_WHEEL_VELOCITY,
+//                                            Constants.BR_PID.calculate(currentSpeeds.rearRightMetersPerSecond, speeds.rearRightMetersPerSecond) / Constants.MAX_WHEEL_VELOCITY));
+//    }
 
     /**
      * Sets the speed of each side of the robot, putting it into tank drive

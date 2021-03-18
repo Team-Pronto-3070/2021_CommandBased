@@ -17,7 +17,6 @@ import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 
 import frc.robot.util.XdriveKinematics;
-import frc.robot.util.XdriveMotorVoltages;
 import frc.robot.util.XdriveWheelSpeeds;
 import frc.robot.subsystems.Drive_s;
 import frc.robot.Constants;
@@ -55,7 +54,7 @@ public class XdriveTrajectoryCommand extends CommandBase {
   private final PIDController m_frontRightController;
   private final PIDController m_rearRightController;
   private final Supplier<XdriveWheelSpeeds> m_currentWheelSpeeds;
-  private final Consumer<XdriveMotorVoltages> m_outputDriveVoltages;
+  private final Consumer<XdriveWheelSpeeds> m_outputDriveVoltages;
   private final Consumer<XdriveWheelSpeeds> m_outputWheelSpeeds;
   private XdriveWheelSpeeds m_prevSpeeds;
   private double m_prevTime;
@@ -103,7 +102,7 @@ public class XdriveTrajectoryCommand extends CommandBase {
       PIDController frontRightController,
       PIDController rearRightController,
       Supplier<XdriveWheelSpeeds> currentWheelSpeeds,
-      Consumer<XdriveMotorVoltages> outputDriveVoltages,
+      Consumer<XdriveWheelSpeeds> outputDriveVoltages,
       Subsystem... requirements) {
     m_trajectory = trajectory;
     m_pose = pose;
@@ -177,7 +176,7 @@ public class XdriveTrajectoryCommand extends CommandBase {
       PIDController frontRightController,
       PIDController rearRightController,
       Supplier<XdriveWheelSpeeds> currentWheelSpeeds,
-      Consumer<XdriveMotorVoltages> outputDriveVoltages,
+      Consumer<XdriveWheelSpeeds> outputDriveVoltages,
       Subsystem... requirements) {
 
     this(
@@ -322,15 +321,21 @@ public class XdriveTrajectoryCommand extends CommandBase {
       Supplier<Rotation2d> desiredRotation,
       Drive_s drive) {
         this(trajectory,
-             drive::getPose,
-             drive.getKinematics(),
-             Constants.X_PID_CONTROLLER,
-             Constants.X_PID_CONTROLLER,
-             Constants.THETA_PID_CONTROLLER,
-             desiredRotation,
-             Constants.MAX_WHEEL_VELOCITY,
-             drive::setWheelSpeeds,
-             drive);
+        drive::getPose,
+        Constants.FEEDFORWARD,
+        drive.getKinematics(),
+        Constants.X_PID_CONTROLLER,
+        Constants.Y_PID_CONTROLLER,
+        Constants.THETA_PID_CONTROLLER,
+        desiredRotation,
+        Constants.MAX_WHEEL_VELOCITY,
+        Constants.FL_PID,
+        Constants.BL_PID,
+        Constants.FR_PID,
+        Constants.BR_PID,
+        drive::getWheelSpeeds,
+        drive::setIndividual,
+        drive);
       }
 
   /**
@@ -353,13 +358,19 @@ public class XdriveTrajectoryCommand extends CommandBase {
     Drive_s drive) {
       this(trajectory,
            drive::getPose,
+           Constants.FEEDFORWARD,
            drive.getKinematics(),
            Constants.X_PID_CONTROLLER,
            Constants.Y_PID_CONTROLLER,
            Constants.THETA_PID_CONTROLLER,
            () -> trajectory.getStates().get(trajectory.getStates().size() - 1).poseMeters.getRotation(),
            Constants.MAX_WHEEL_VELOCITY,
-           drive::setWheelSpeeds,
+           Constants.FL_PID,
+           Constants.BL_PID,
+           Constants.FR_PID,
+           Constants.BR_PID,
+           drive::getWheelSpeeds,
+           drive::setIndividual,
            drive);
   }
 
@@ -446,7 +457,7 @@ public class XdriveTrajectoryCommand extends CommandBase {
                   m_currentWheelSpeeds.get().rearRightMetersPerSecond, rearRightSpeedSetpoint);
 
       m_outputDriveVoltages.accept(
-          new XdriveMotorVoltages(
+          new XdriveWheelSpeeds(
               frontLeftOutput, frontRightOutput, rearLeftOutput, rearRightOutput));
 
     } else {

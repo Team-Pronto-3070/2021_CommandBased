@@ -6,6 +6,7 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj.controller.PIDController;
 import edu.wpi.first.wpilibj.controller.ProfiledPIDController;
+import edu.wpi.first.wpilibj.controller.SimpleMotorFeedforward;
 import edu.wpi.first.wpilibj.geometry.Pose2d;
 import edu.wpi.first.wpilibj.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.trajectory.TrapezoidProfile;
@@ -48,10 +49,12 @@ public final class Constants {
     public static final PIDController Y_PID_CONTROLLER = new PIDController(1, 0, 0);
     public static final ProfiledPIDController THETA_PID_CONTROLLER = new ProfiledPIDController(1, 0, 0, new TrapezoidProfile.Constraints(MAX_ANGULAR_VELOCITY, MAX_ANGULAR_ACCELERATION));
 
-    public static final PIDController FL_PID = new PIDController(1, 0, 0);
-    public static final PIDController FR_PID = new PIDController(1, 0, 0);
-    public static final PIDController BL_PID = new PIDController(1, 0, 0);
-    public static final PIDController BR_PID = new PIDController(1, 0, 0);
+    public static final PIDController FL_PID = new PIDController(0.5, 0, 0);
+    public static final PIDController FR_PID = new PIDController(0.5, 0, 0);
+    public static final PIDController BL_PID = new PIDController(0.5, 0, 0);
+    public static final PIDController BR_PID = new PIDController(0.5, 0, 0);
+
+    public static final SimpleMotorFeedforward FEEDFORWARD = new SimpleMotorFeedforward(0, 0.2, 0);
     
     //odometry constants
     public static final int[] ODOMETRY_WHEEL_LEFT_PORT = new int[] {-1, -1}; //dio pins for odometry wheel encoders
