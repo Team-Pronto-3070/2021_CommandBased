@@ -5,6 +5,7 @@
 package frc.robot;
 
 import java.util.Map;
+import java.util.List;
 
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.GenericHID;
@@ -12,7 +13,9 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-
+import edu.wpi.first.wpilibj.trajectory.Trajectory;
+import edu.wpi.first.wpilibj.trajectory.TrajectoryConfig;
+import edu.wpi.first.wpilibj.trajectory.TrajectoryGenerator;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
@@ -25,6 +28,7 @@ import frc.robot.commands.XdriveTrajectoryCommand;
 
 import frc.robot.subsystems.Drive_s;
 import frc.robot.subsystems.Intake_s;
+import frc.robot.util.XdriveKinematicsConstraint;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -67,6 +71,14 @@ public class RobotContainer {
     configureButtonBindings();
   }
 
+  private Trajectory generateInitTrajectory(String path) {
+    return TrajectoryGenerator.generateTrajectory(Constants.INITIAL_POSE,
+                                                  List.of(),
+                                                  m_drive.trajectoryFromJSON(path).getInitialPose(),
+                                                  new TrajectoryConfig(2 /*max velocity*/, 1 /*max acceleration*/)
+                                                    .addConstraint(new XdriveKinematicsConstraint(m_drive.getKinematics(), 2 /*max velocity*/)));
+  }
+
   /**
    * Use this method to define your button->command mappings. Buttons can be created by
    * instantiating a {@link GenericHID} or one of its subclasses ({@link
@@ -89,16 +101,16 @@ public class RobotContainer {
     oi.getButton("REPLACE_ME").whenPressed(new SequentialCommandGroup(
                                               new InstantCommand(() -> m_drive.resetOdometry(Constants.INITIAL_POSE), m_drive),
                                               new SelectCommand(Map.ofEntries(
-                                                                    Map.entry(autoOptions.BARREL, new XdriveTrajectoryCommand("paths/BarrelInit.wpilib.json", m_drive)),
-                                                                    Map.entry(autoOptions.BOUNCE, new XdriveTrajectoryCommand("paths/BounceInit.wpilib.json", m_drive)),
-                                                                    Map.entry(autoOptions.SLALOM, new XdriveTrajectoryCommand("paths/SlalomInit.wpilib.json", m_drive)),
-                                                                    Map.entry(autoOptions.GALACTICSEARCH, new XdriveTrajectoryCommand("paths/GalacticSearchInit.wpilib.json", m_drive))),
+                                                                    Map.entry(autoOptions.BARREL, new XdriveTrajectoryCommand(generateInitTrajectory("paths/BarrelPath.wpilib.json"), m_drive)),
+                                                                    Map.entry(autoOptions.BOUNCE, new XdriveTrajectoryCommand(generateInitTrajectory("paths/BouncePath.wpilib.json"), m_drive)),
+                                                                    Map.entry(autoOptions.SLALOM, new XdriveTrajectoryCommand(generateInitTrajectory("paths/SlalomPath.wpilib.json"), m_drive)),
+                                                                    Map.entry(autoOptions.GALACTICSEARCH, new XdriveTrajectoryCommand(generateInitTrajectory("paths/aRed.wpilib.json"), m_drive))),
                                                                 autoChooser::getSelected)));
     //when pressed, run autonomous with a timer
     oi.getButton("REPLACE_ME").whenPressed(new SequentialCommandGroup(
                                               new InstantCommand(() -> startTime = timer.get()),
                                               new ParallelDeadlineGroup(
-                                                  new SelectCommand(this::getAutonomousCommand),
+                                                  getAutonomousCommand(),
                                                   new RunCommand(() -> SmartDashboard.putNumber("Autonomous Time", timer.get() - startTime)))));
   }
 
