@@ -51,7 +51,7 @@ public class XdriveWheelSpeeds {
    *
    * @param attainableMaxSpeedMetersPerSecond The absolute max speed that a wheel can reach.
    */
-  public void normalize(double attainableMaxSpeedMetersPerSecond) {
+  public XdriveWheelSpeeds normalize(double attainableMaxSpeedMetersPerSecond) {
     double realMaxSpeed =
         DoubleStream.of(
                 frontLeftMetersPerSecond,
@@ -71,6 +71,8 @@ public class XdriveWheelSpeeds {
       rearRightMetersPerSecond =
           rearRightMetersPerSecond / realMaxSpeed * attainableMaxSpeedMetersPerSecond;
     }
+
+    return this;
   }
 
   @Override
