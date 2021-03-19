@@ -146,6 +146,13 @@ public class Drive_s extends SubsystemBase{
      */
     public XdriveWheelSpeeds getWheelSpeeds() {
         //Use encoders + encoder constants to fill this method
+        
+        double FL_V = talFL.getSelectedSensorVelocity() * Constants.TICKMS_TO_MSEC;
+        double FR_V = talFR.getSelectedSensorVelocity() * Constants.TICKMS_TO_MSEC;
+        double BL_V = talBL.getSelectedSensorVelocity() * Constants.TICKMS_TO_MSEC;
+        double BR_V = talBR.getSelectedSensorVelocity() * Constants.TICKMS_TO_MSEC;
+        
+        return new XdriveWheelSpeeds(FL_V, FR_V, BL_V, BR_V);
     }
 
     /**

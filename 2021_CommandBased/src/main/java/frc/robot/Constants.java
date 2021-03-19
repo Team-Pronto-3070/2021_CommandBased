@@ -85,4 +85,7 @@ public final class Constants {
     public static final double VX_COEFFICENT = 5;
     public static final double VY_COEFFICENT = 5;
     public static final double OMEGA_COEFFICENT = 5;
+
+    //Ratio of Ticks per 100 milliseconds (output of getSelectedSensorVelocity) to meters per second
+    public static final double TICKMS_TO_MSEC = 0.0011688957;
 }
