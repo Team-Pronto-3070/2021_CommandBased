@@ -2,14 +2,15 @@ package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.geometry.Pose2d;
 import edu.wpi.first.wpilibj.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.geometry.Translation2d;
-import edu.wpi.first.wpilibj.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.trajectory.Trajectory;
 import edu.wpi.first.wpilibj.trajectory.TrajectoryUtil;
 import edu.wpi.first.wpilibj.util.Units;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpiutil.math.VecBuilder;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -20,9 +21,12 @@ import com.ctre.phoenix.motorcontrol.InvertType;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
 
+import com.kauailabs.navx.frc.AHRS;
+
 import frc.robot.Constants;
 import frc.robot.util.XdriveKinematics;
 import frc.robot.util.XdriveOdometry;
+import frc.robot.util.XdrivePoseEstimator;
 import frc.robot.util.XdriveWheelSpeeds;
 
 public class Drive_s extends SubsystemBase{
@@ -38,6 +42,10 @@ public class Drive_s extends SubsystemBase{
 
     //create odometry
     XdriveOdometry odometry;
+
+    private final XdrivePoseEstimator poseEstimator;
+
+    private AHRS imu;
     
     public Drive_s(){
         talFL = new TalonFX(Constants.TAL_FL_PORT);
@@ -73,6 +81,13 @@ public class Drive_s extends SubsystemBase{
         
         //initialize odometry
         odometry = new XdriveOdometry();
+
+        poseEstimator = new XdrivePoseEstimator(new Rotation2d(Units.degreesToRadians(imu.getAngle())),
+                                                Constants.INITIAL_POSE,
+                                                kinematics,
+                                                VecBuilder.fill(0.25, 0.25, Units.degreesToRadians(30)),
+                                                VecBuilder.fill(Units.degreesToRadians(1)),
+                                                VecBuilder.fill(0.1, 0.1, Units.degreesToRadians(1)));
     }
 
     /**
@@ -124,15 +139,13 @@ public class Drive_s extends SubsystemBase{
     }
 
     public Pose2d getPose() {
-        return odometry.getPoseMeters();
+//        return odometry.getPoseMeters();
+        return poseEstimator.getEstimatedPosition();
     }
 
     public void resetOdometry(Pose2d pose) {
         odometry.resetPosition(pose);
-    }
-
-    public void resetOdometry() {
-        odometry.resetPosition(new Pose2d());
+        poseEstimator.resetPosition(pose, new Rotation2d(Units.degreesToRadians(imu.getAngle())));
     }
 
     public XdriveKinematics getKinematics() {
@@ -181,5 +194,7 @@ public class Drive_s extends SubsystemBase{
     @Override
     public void periodic() {
         odometry.update();
+        poseEstimator.update(new Rotation2d(Units.degreesToRadians(imu.getAngle())), getWheelSpeeds());
+        poseEstimator.addVisionMeasurement(odometry.getPoseMeters(), Timer.getFPGATimestamp());
     }
 }
