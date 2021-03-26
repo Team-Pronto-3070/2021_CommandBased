@@ -10,6 +10,11 @@ import edu.wpi.first.wpilibj.controller.SimpleMotorFeedforward;
 import edu.wpi.first.wpilibj.geometry.Pose2d;
 import edu.wpi.first.wpilibj.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.trajectory.TrapezoidProfile;
+import edu.wpi.first.wpilibj.util.Units;
+import edu.wpi.first.wpiutil.math.Vector;
+import edu.wpi.first.wpiutil.math.VecBuilder;
+import edu.wpi.first.wpiutil.math.numbers.N1;
+import edu.wpi.first.wpiutil.math.numbers.N3;
 
 
 /**
@@ -90,4 +95,9 @@ public final class Constants {
 
     //Ratio of Ticks per 100 milliseconds (output of getSelectedSensorVelocity) to meters per second
     public static final double TICKMS_TO_MSEC = 0.0011688957;
+
+    //pose estimator standard deviations
+    public static final Vector<N3> stateStdDevs = VecBuilder.fill(0.25, 0.25, Units.degreesToRadians(30));
+    public static final Vector<N1> imuStdDevs = VecBuilder.fill(Units.degreesToRadians(1));
+    public static final Vector<N3> odometryStdDevs = VecBuilder.fill(0.1, 0.1, Units.degreesToRadians(1));
 }

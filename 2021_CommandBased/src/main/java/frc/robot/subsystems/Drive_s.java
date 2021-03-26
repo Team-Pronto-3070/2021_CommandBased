@@ -10,7 +10,6 @@ import edu.wpi.first.wpilibj.trajectory.Trajectory;
 import edu.wpi.first.wpilibj.trajectory.TrajectoryUtil;
 import edu.wpi.first.wpilibj.util.Units;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import edu.wpi.first.wpiutil.math.VecBuilder;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -85,9 +84,9 @@ public class Drive_s extends SubsystemBase{
         poseEstimator = new XdrivePoseEstimator(new Rotation2d(Units.degreesToRadians(imu.getAngle())),
                                                 Constants.INITIAL_POSE,
                                                 kinematics,
-                                                VecBuilder.fill(0.25, 0.25, Units.degreesToRadians(30)),
-                                                VecBuilder.fill(Units.degreesToRadians(1)),
-                                                VecBuilder.fill(0.1, 0.1, Units.degreesToRadians(1)));
+                                                Constants.stateStdDevs,
+                                                Constants.imuStdDevs,
+                                                Constants.odometryStdDevs);
     }
 
     /**
