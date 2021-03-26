@@ -4,7 +4,7 @@
 
 package frc.robot;
 
-import edu.wpi.first.wpilibj.SerialPort;
+import edu.wpi.first.wpilibj.I2C;
 import edu.wpi.first.wpilibj.controller.PIDController;
 import edu.wpi.first.wpilibj.controller.ProfiledPIDController;
 import edu.wpi.first.wpilibj.controller.SimpleMotorFeedforward;
@@ -102,5 +102,5 @@ public final class Constants {
     public static final Vector<N1> IMU_STD_DEVS = VecBuilder.fill(Units.degreesToRadians(1));
     public static final Vector<N3> ODOMETRY_STD_DEVS = VecBuilder.fill(0.1, 0.1, Units.degreesToRadians(1));
 
-    public static final SerialPort.Port IMU_PORT = SerialPort.Port.kUSB;
+    public static final I2C.Port IMU_PORT = I2C.Port.kOnboard;
 }
