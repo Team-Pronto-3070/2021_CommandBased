@@ -1,6 +1,7 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj.kinematics.ChassisSpeeds;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 
 import frc.robot.subsystems.Drive_s;
@@ -28,6 +29,9 @@ public class TeleopCommand extends CommandBase{
   @Override
   public void execute() {
     //Sets wheel speeds according to joystick values
+    SmartDashboard.putNumber("x", _oi.getX());
+    SmartDashboard.putNumber("y", _oi.getY());
+    SmartDashboard.putNumber("theta", _oi.getTheta());
     _drive.setIndividual(_drive.getKinematics().toWheelSpeeds(ChassisSpeeds.fromFieldRelativeSpeeds(
                                   (Math.abs(_oi.getX()) < Constants.JOY_STICK_VX_DEADZONE) ? 0 : _oi.getX() * Constants.VX_COEFFICENT,
                                   (Math.abs(_oi.getY()) < Constants.JOY_STICK_VY_DEADZONE) ? 0 : _oi.getY() * Constants.VY_COEFFICENT,

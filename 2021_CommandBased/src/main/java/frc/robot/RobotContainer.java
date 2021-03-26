@@ -94,11 +94,11 @@ public class RobotContainer {
     oi.addButton("btn5", 5);
 
     // Referencing the added buttons when pressed
-    oi.getButton("REPLACE_ME").whileHeld(new InstantCommand(() -> m_intake.set(Constants.IN_SPEED), m_intake), true);
-    oi.getButton("REPLACE_ME").whileHeld(new InstantCommand(() -> m_intake.set(Constants.OUT_SPEED), m_intake), true);
+    oi.getButton("btn1").whileHeld(new InstantCommand(() -> m_intake.set(Constants.IN_SPEED), m_intake), true);
+    oi.getButton("btn2").whileHeld(new InstantCommand(() -> m_intake.set(Constants.OUT_SPEED), m_intake), true);
 
     //when pressed, initialize odometry and move to starting location for autonomous
-    oi.getButton("REPLACE_ME").whenPressed(new SequentialCommandGroup(
+    oi.getButton("btn3").whenPressed(new SequentialCommandGroup(
                                               new InstantCommand(() -> m_drive.resetOdometry(Constants.INITIAL_POSE), m_drive),
                                               new SelectCommand(Map.ofEntries(
                                                                     Map.entry(autoOptions.BARREL, new XdriveTrajectoryCommand(generateInitTrajectory("paths/BarrelPath.wpilib.json"), m_drive)),
@@ -107,7 +107,7 @@ public class RobotContainer {
                                                                     Map.entry(autoOptions.GALACTICSEARCH, new XdriveTrajectoryCommand(generateInitTrajectory("paths/aRed.wpilib.json"), m_drive))),
                                                                 autoChooser::getSelected)));
     //when pressed, run autonomous with a timer
-    oi.getButton("REPLACE_ME").whenPressed(new SequentialCommandGroup(
+    oi.getButton("btn4").whenPressed(new SequentialCommandGroup(
                                               new InstantCommand(() -> startTime = timer.get()),
                                               new ParallelDeadlineGroup(
                                                   getAutonomousCommand(),

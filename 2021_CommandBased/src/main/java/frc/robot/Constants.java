@@ -23,13 +23,13 @@ import edu.wpi.first.wpilibj.trajectory.TrapezoidProfile;
 public final class Constants {
 
     //Drive Talon Ports
-    public final static int TAL_FL_PORT = -1;
-    public final static int TAL_BL_PORT = -1;
-    public final static int TAL_FR_PORT = -1;
-    public final static int TAL_BR_PORT = -1;
+    public final static int TAL_FL_PORT = 2;
+    public final static int TAL_BL_PORT = 1;
+    public final static int TAL_FR_PORT = 3;
+    public final static int TAL_BR_PORT = 5;
 
     //Intake Talon Ports
-    public final static int TAL_INTAKE_PORT = -1;
+    public final static int TAL_INTAKE_PORT = 4;
 
     //Intake speed constants
     public static final double IN_SPEED = 0.5;
@@ -57,9 +57,9 @@ public final class Constants {
     public static final SimpleMotorFeedforward FEEDFORWARD = new SimpleMotorFeedforward(0, 0.2, 0);
     
     //odometry constants
-    public static final int[] ODOMETRY_WHEEL_LEFT_PORT = new int[] {-1, -1}; //dio pins for odometry wheel encoders
-    public static final int[] ODOMETRY_WHEEL_RIGHT_PORT = new int[] {-1, -1};
-    public static final int[] ODOMETRY_WHEEL_BACK_PORT = new int[] {-1, -1};
+    public static final int[] ODOMETRY_WHEEL_LEFT_PORT = new int[] {0, 1}; //dio pins for odometry wheel encoders
+    public static final int[] ODOMETRY_WHEEL_RIGHT_PORT = new int[] {2, 3};
+    public static final int[] ODOMETRY_WHEEL_BACK_PORT = new int[] {4, 5};
 
     public static final boolean ODOMETRY_WHEEL_LEFT_REVERSED = false;
     public static final boolean ODOMETRY_WHEEL_RIGHT_REVERSED = false;
@@ -76,17 +76,17 @@ public final class Constants {
     public static final Pose2d INITIAL_POSE = new Pose2d(0, 0, new Rotation2d(0));
 
     //Joystick port
-    public final static int JOY_PORT = -1;
+    public final static int JOY_PORT = 0;
 
     //Joystick Deadzone Constants
-    public static final double JOY_STICK_VX_DEADZONE = 0.1;
-    public static final double JOY_STICK_VY_DEADZONE = 0.1;
-    public static final double JOY_STICK_OMEGA_DEADZONE = 0.1;
+    public static final double JOY_STICK_VX_DEADZONE = 0.5;
+    public static final double JOY_STICK_VY_DEADZONE = 0.5;
+    public static final double JOY_STICK_OMEGA_DEADZONE = 0.5;
     
     //Joystick Coefficent Constants
-    public static final double VX_COEFFICENT = 5;
-    public static final double VY_COEFFICENT = 5;
-    public static final double OMEGA_COEFFICENT = 5;
+    public static final double VX_COEFFICENT = .25;
+    public static final double VY_COEFFICENT = .25;
+    public static final double OMEGA_COEFFICENT = .25;
 
     //Ratio of Ticks per 100 milliseconds (output of getSelectedSensorVelocity) to meters per second
     public static final double TICKMS_TO_MSEC = 0.0011688957;

@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.InvertType;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
@@ -44,10 +45,10 @@ public class Drive_s extends SubsystemBase{
         talFR = new TalonFX(Constants.TAL_FR_PORT);
         talBR = new TalonFX(Constants.TAL_BR_PORT);
 
-        talFL.setInverted(InvertType.None);
-        talFR.setInverted(InvertType.None);
-        talBL.setInverted(InvertType.None);
-        talBR.setInverted(InvertType.None);
+        talFL.setInverted(InvertType.InvertMotorOutput);
+        talFR.setInverted(InvertType.InvertMotorOutput);
+        talBL.setInverted(InvertType.InvertMotorOutput);
+        talBR.setInverted(InvertType.InvertMotorOutput);
 
         talFL.setNeutralMode(NeutralMode.Coast);
         talFR.setNeutralMode(NeutralMode.Coast);

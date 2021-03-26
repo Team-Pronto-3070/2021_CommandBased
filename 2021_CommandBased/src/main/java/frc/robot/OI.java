@@ -71,16 +71,16 @@ public class OI
 
     public double getX(){
 
-        return joystick.getRawAxis(0);
+        return -joystick.getRawAxis(1);
     }
 
     public double getY(){
 
-        return joystick.getRawAxis(1);
+        return -joystick.getRawAxis(0);
     }
 
     public double getTheta(){
 
-        return joystick.getRawAxis(2);
+        return -joystick.getRawAxis(2);
     }
 }
