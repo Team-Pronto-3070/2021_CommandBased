@@ -79,14 +79,14 @@ public final class Constants {
     public final static int JOY_PORT = 0;
 
     //Joystick Deadzone Constants
-    public static final double JOY_STICK_VX_DEADZONE = 0.5;
-    public static final double JOY_STICK_VY_DEADZONE = 0.5;
-    public static final double JOY_STICK_OMEGA_DEADZONE = 0.5;
+    public static final double JOY_STICK_VX_DEADZONE = 0.15;
+    public static final double JOY_STICK_VY_DEADZONE = 0.15;
+    public static final double JOY_STICK_OMEGA_DEADZONE = 0.15;
     
     //Joystick Coefficent Constants
-    public static final double VX_COEFFICENT = .25;
-    public static final double VY_COEFFICENT = .25;
-    public static final double OMEGA_COEFFICENT = .25;
+    public static final double VX_COEFFICENT = 1;
+    public static final double VY_COEFFICENT = 1;
+    public static final double OMEGA_COEFFICENT = 1;
 
     //Ratio of Ticks per 100 milliseconds (output of getSelectedSensorVelocity) to meters per second
     public static final double TICKMS_TO_MSEC = 0.0011688957;
