@@ -70,7 +70,9 @@ public class Drive_s extends SubsystemBase{
         talFL.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor);
 		talFR.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor);
 		talBL.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor);
-		talBR.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor);
+        talBR.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor);
+        
+        imu = new AHRS(Constants.IMU_PORT);
 
         //initialize kinematics with relative locations of wheels
         kinematics = new XdriveKinematics(new Translation2d(Units.inchesToMeters(Constants.DRIVETRAIN_RADIUS_INCHES), new Rotation2d(3 * Math.PI / 4)),
@@ -84,9 +86,9 @@ public class Drive_s extends SubsystemBase{
         poseEstimator = new XdrivePoseEstimator(new Rotation2d(Units.degreesToRadians(imu.getAngle())),
                                                 Constants.INITIAL_POSE,
                                                 kinematics,
-                                                Constants.stateStdDevs,
-                                                Constants.imuStdDevs,
-                                                Constants.odometryStdDevs);
+                                                Constants.STATE_STD_DEVS,
+                                                Constants.IMU_STD_DEVS,
+                                                Constants.ODOMETRY_STD_DEVS);
     }
 
     /**

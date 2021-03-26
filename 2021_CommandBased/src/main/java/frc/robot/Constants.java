@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import edu.wpi.first.wpilibj.SerialPort;
 import edu.wpi.first.wpilibj.controller.PIDController;
 import edu.wpi.first.wpilibj.controller.ProfiledPIDController;
 import edu.wpi.first.wpilibj.controller.SimpleMotorFeedforward;
@@ -97,7 +98,9 @@ public final class Constants {
     public static final double TICKMS_TO_MSEC = 0.0011688957;
 
     //pose estimator standard deviations
-    public static final Vector<N3> stateStdDevs = VecBuilder.fill(0.25, 0.25, Units.degreesToRadians(30));
-    public static final Vector<N1> imuStdDevs = VecBuilder.fill(Units.degreesToRadians(1));
-    public static final Vector<N3> odometryStdDevs = VecBuilder.fill(0.1, 0.1, Units.degreesToRadians(1));
+    public static final Vector<N3> STATE_STD_DEVS = VecBuilder.fill(0.25, 0.25, Units.degreesToRadians(30));
+    public static final Vector<N1> IMU_STD_DEVS = VecBuilder.fill(Units.degreesToRadians(1));
+    public static final Vector<N3> ODOMETRY_STD_DEVS = VecBuilder.fill(0.1, 0.1, Units.degreesToRadians(1));
+
+    public static final SerialPort.Port IMU_PORT = SerialPort.Port.kUSB;
 }
