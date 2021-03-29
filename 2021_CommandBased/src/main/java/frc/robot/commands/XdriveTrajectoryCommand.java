@@ -23,6 +23,7 @@ import frc.robot.Constants;
 
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import java.util.function.BiFunction;
 
 /**
  * A command that uses two PID controllers ({@link PIDController}) and a ProfiledPIDController
@@ -47,7 +48,7 @@ public class XdriveTrajectoryCommand extends CommandBase {
   private final SimpleMotorFeedforward m_feedforward;
   private final XdriveKinematics m_kinematics;
   private final HolonomicDriveController m_controller;
-  private final Supplier<Rotation2d> m_desiredRotation;
+  private final BiFunction<Trajectory, Double, Rotation2d> m_desiredRotation;
   private final double m_maxWheelVelocityMetersPerSecond;
   private final PIDController m_frontLeftController;
   private final PIDController m_rearLeftController;
@@ -95,7 +96,7 @@ public class XdriveTrajectoryCommand extends CommandBase {
       PIDController xController,
       PIDController yController,
       ProfiledPIDController thetaController,
-      Supplier<Rotation2d> desiredRotation,
+      BiFunction<Trajectory, Double, Rotation2d> desiredRotation,
       double maxWheelVelocityMetersPerSecond,
       PIDController frontLeftController,
       PIDController rearLeftController,
@@ -187,8 +188,8 @@ public class XdriveTrajectoryCommand extends CommandBase {
         xController,
         yController,
         thetaController,
-        () ->
-            trajectory.getStates().get(trajectory.getStates().size() - 1).poseMeters.getRotation(),
+        (traj, time) ->
+            traj.getStates().get(traj.getStates().size() - 1).poseMeters.getRotation(),
         maxWheelVelocityMetersPerSecond,
         frontLeftController,
         rearLeftController,
@@ -226,7 +227,7 @@ public class XdriveTrajectoryCommand extends CommandBase {
       PIDController xController,
       PIDController yController,
       ProfiledPIDController thetaController,
-      Supplier<Rotation2d> desiredRotation,
+      BiFunction<Trajectory, Double, Rotation2d> desiredRotation,
       double maxWheelVelocityMetersPerSecond,
       Consumer<XdriveWheelSpeeds> outputWheelSpeeds,
       Subsystem... requirements) {
@@ -297,8 +298,8 @@ public class XdriveTrajectoryCommand extends CommandBase {
         xController,
         yController,
         thetaController,
-        () ->
-            trajectory.getStates().get(trajectory.getStates().size() - 1).poseMeters.getRotation(),
+        (traj, time) ->
+            traj.getStates().get(traj.getStates().size() - 1).poseMeters.getRotation(),
         maxWheelVelocityMetersPerSecond,
         outputWheelSpeeds,
         requirements);
@@ -318,7 +319,7 @@ public class XdriveTrajectoryCommand extends CommandBase {
    */
   public XdriveTrajectoryCommand(
       Trajectory trajectory,
-      Supplier<Rotation2d> desiredRotation,
+      BiFunction<Trajectory, Double, Rotation2d> desiredRotation,
       Drive_s drive) {
         this(trajectory,
         drive::getPose,
@@ -363,7 +364,7 @@ public class XdriveTrajectoryCommand extends CommandBase {
            Constants.X_PID_CONTROLLER,
            Constants.Y_PID_CONTROLLER,
            Constants.THETA_PID_CONTROLLER,
-           () -> trajectory.getStates().get(trajectory.getStates().size() - 1).poseMeters.getRotation(),
+           (traj, time) -> traj.getStates().get(traj.getStates().size() - 1).poseMeters.getRotation(),
            Constants.MAX_WHEEL_VELOCITY,
            Constants.FL_PID,
            Constants.BL_PID,
@@ -376,6 +377,10 @@ public class XdriveTrajectoryCommand extends CommandBase {
 
   public XdriveTrajectoryCommand(String path, Drive_s drive) {
     this(drive.trajectoryFromJSON(path), drive);
+  }
+
+  public XdriveTrajectoryCommand(String path, BiFunction<Trajectory, Double, Rotation2d> desiredRotation, Drive_s drive) {
+    this(drive.trajectoryFromJSON(path), desiredRotation, drive);
   }
 
   @Override
@@ -400,7 +405,7 @@ public class XdriveTrajectoryCommand extends CommandBase {
 
     var desiredState = m_trajectory.sample(curTime);
 
-    var targetChassisSpeeds = m_controller.calculate(m_pose.get(), desiredState, m_desiredRotation.get());
+    var targetChassisSpeeds = m_controller.calculate(m_pose.get(), desiredState, m_desiredRotation.apply(m_trajectory, curTime));
     var targetWheelSpeeds = m_kinematics.toWheelSpeeds(targetChassisSpeeds);
 
     targetWheelSpeeds.normalize(m_maxWheelVelocityMetersPerSecond);
