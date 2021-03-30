@@ -211,8 +211,7 @@ public class Drive_s extends SubsystemBase{
     @Override
     public void periodic() {
         odometry.update();
-        poseEstimator.update(imu.getRotation2d(), getWheelSpeeds());
-//        poseEstimator.addVisionMeasurement(odometry.getPoseMeters(), Timer.getFPGATimestamp());
+        poseEstimator.update(imu.getRotation2d(), getWheelSpeeds(), odometry.getPoseMeters());
         SmartDashboard.putNumber("gyro_angle", imu.getAngle());
         SmartDashboard.putNumber("pose_x", getPose().getX());
         SmartDashboard.putNumber("pose_y", getPose().getY());

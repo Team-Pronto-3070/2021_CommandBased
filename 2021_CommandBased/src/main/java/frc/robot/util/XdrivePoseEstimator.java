@@ -17,7 +17,6 @@ import edu.wpi.first.wpiutil.math.Nat;
 import edu.wpi.first.wpiutil.math.VecBuilder;
 import edu.wpi.first.wpiutil.math.numbers.N1;
 import edu.wpi.first.wpiutil.math.numbers.N3;
-import java.util.function.BiConsumer;
 
 /**
  * This class wraps an {@link UnscentedKalmanFilter Unscented Kalman Filter} to fuse
@@ -45,8 +44,6 @@ import java.util.function.BiConsumer;
 public class XdrivePoseEstimator {
   private final UnscentedKalmanFilter<N3, N3, N1> m_observer;
   private final XdriveKinematics m_kinematics;
-  private final BiConsumer<Matrix<N3, N1>, Matrix<N3, N1>> m_visionCorrect;
-  private final KalmanFilterLatencyCompensator<N3, N3, N1> m_latencyCompensator;
 
   private final double m_nominalDt; // Seconds
   private double m_prevTimeSeconds = -1.0;
@@ -132,41 +129,13 @@ public class XdrivePoseEstimator {
             AngleStatistics.angleAdd(2),
             m_nominalDt);
     m_kinematics = kinematics;
-    m_latencyCompensator = new KalmanFilterLatencyCompensator<>();
 
-    // Initialize vision R
-    setVisionMeasurementStdDevs(visionMeasurementStdDevs);
-
-    m_visionCorrect =
-        (u, y) ->
-            m_observer.correct(
-                Nat.N3(),
-                u,
-                y,
-                (x, u1) -> x,
-                m_visionDiscreteR,
-                AngleStatistics.angleMean(2),
-                AngleStatistics.angleResidual(2),
-                AngleStatistics.angleResidual(2),
-                AngleStatistics.angleAdd(2));
+    var visionContR = StateSpaceUtil.makeCovarianceMatrix(Nat.N3(), visionMeasurementStdDevs);
+    m_visionDiscreteR = Discretization.discretizeR(visionContR, m_nominalDt);
 
     m_gyroOffset = initialPoseMeters.getRotation().minus(gyroAngle);
     m_previousAngle = initialPoseMeters.getRotation();
     m_observer.setXhat(StateSpaceUtil.poseTo3dVector(initialPoseMeters));
-  }
-
-  /**
-   * Sets the pose estimator's trust of global measurements. This might be used to change trust in
-   * vision measurements after the autonomous period, or to change trust as distance to a vision
-   * target increases.
-   *
-   * @param visionMeasurementStdDevs Standard deviations of the vision measurements. Increase these
-   *     numbers to trust global measurements from vision less. This matrix is in the form [x, y,
-   *     theta]^T, with units in meters and radians.
-   */
-  public void setVisionMeasurementStdDevs(Matrix<N3, N1> visionMeasurementStdDevs) {
-    var visionContR = StateSpaceUtil.makeCovarianceMatrix(Nat.N3(), visionMeasurementStdDevs);
-    m_visionDiscreteR = Discretization.discretizeR(visionContR, m_nominalDt);
   }
 
   /**
@@ -197,30 +166,6 @@ public class XdrivePoseEstimator {
   }
 
   /**
-   * Add a vision measurement to the Unscented Kalman Filter. This will correct the odometry pose
-   * estimate while still accounting for measurement noise.
-   *
-   * <p>This method can be called as infrequently as you want, as long as you are calling {@link
-   * XdrivePoseEstimator#update} every loop.
-   *
-   * @param visionRobotPoseMeters The pose of the robot as measured by the vision camera.
-   * @param timestampSeconds The timestamp of the vision measurement in seconds. Note that if you
-   *     don't use your own time source by calling {@link XdrivePoseEstimator#updateWithTime}
-   *     then you must use a timestamp with an epoch since FPGA startup (i.e. the epoch of this
-   *     timestamp is the same epoch as Timer.getFPGATimestamp.) This means that you should use
-   *     Timer.getFPGATimestamp as your time source or sync the epochs.
-   */
-  public void addVisionMeasurement(Pose2d visionRobotPoseMeters, double timestampSeconds) {
-    m_latencyCompensator.applyPastGlobalMeasurement(
-        Nat.N3(),
-        m_observer,
-        m_nominalDt,
-        StateSpaceUtil.poseTo3dVector(visionRobotPoseMeters),
-        m_visionCorrect,
-        timestampSeconds);
-  }
-
-  /**
    * Updates the the Unscented Kalman Filter using only wheel encoder information. This should be
    * called every loop, and the correct loop period must be passed into the constructor of this
    * class.
@@ -229,8 +174,8 @@ public class XdrivePoseEstimator {
    * @param wheelSpeeds The current speeds of the x-drive wheels.
    * @return The estimated pose of the robot in meters.
    */
-  public Pose2d update(Rotation2d gyroAngle, XdriveWheelSpeeds wheelSpeeds) {
-    return updateWithTime(WPIUtilJNI.now() * 1.0e-6, gyroAngle, wheelSpeeds);
+  public Pose2d update(Rotation2d gyroAngle, XdriveWheelSpeeds wheelSpeeds, Pose2d odometryMeasurement) {
+    return updateWithTime(WPIUtilJNI.now() * 1.0e-6, gyroAngle, wheelSpeeds, odometryMeasurement);
   }
 
   /**
@@ -245,7 +190,7 @@ public class XdrivePoseEstimator {
    */
   @SuppressWarnings("LocalVariableName")
   public Pose2d updateWithTime(
-      double currentTimeSeconds, Rotation2d gyroAngle, XdriveWheelSpeeds wheelSpeeds) {
+      double currentTimeSeconds, Rotation2d gyroAngle, XdriveWheelSpeeds wheelSpeeds, Pose2d odometryMeasurement) {
     double dt = m_prevTimeSeconds >= 0 ? currentTimeSeconds - m_prevTimeSeconds : m_nominalDt;
     m_prevTimeSeconds = currentTimeSeconds;
 
@@ -261,9 +206,18 @@ public class XdrivePoseEstimator {
     m_previousAngle = angle;
 
     var localY = VecBuilder.fill(angle.getRadians());
-    m_latencyCompensator.addObserverState(m_observer, u, localY, currentTimeSeconds);
     m_observer.predict(u, dt);
     m_observer.correct(u, localY);
+    m_observer.correct(
+      Nat.N3(),
+      u,
+      StateSpaceUtil.poseTo3dVector(odometryMeasurement),
+      (xv, uv) -> xv,
+      m_visionDiscreteR,
+      AngleStatistics.angleMean(2),
+      AngleStatistics.angleResidual(2),
+      AngleStatistics.angleResidual(2),
+      AngleStatistics.angleAdd(2));
 
     return getEstimatedPosition();
   }
