@@ -38,7 +38,7 @@ public final class Constants {
     public final static int TAL_INTAKE_PORT = 4;
 
     //Intake speed constants
-    public static final double IN_SPEED = 0.5;
+    public static final double IN_SPEED = 1;
     public static final double OUT_SPEED = -0.5;
 
     //Drive Subsystem Constants
