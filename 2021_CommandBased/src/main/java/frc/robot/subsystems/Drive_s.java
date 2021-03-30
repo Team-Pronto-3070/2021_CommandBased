@@ -6,6 +6,7 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.geometry.Pose2d;
 import edu.wpi.first.wpilibj.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.geometry.Translation2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.trajectory.Trajectory;
 import edu.wpi.first.wpilibj.trajectory.TrajectoryUtil;
 import edu.wpi.first.wpilibj.util.Units;
@@ -197,5 +198,6 @@ public class Drive_s extends SubsystemBase{
         odometry.update();
         poseEstimator.update(new Rotation2d(Units.degreesToRadians(imu.getAngle())), getWheelSpeeds());
         poseEstimator.addVisionMeasurement(odometry.getPoseMeters(), Timer.getFPGATimestamp());
+        SmartDashboard.putNumber("gyro_angle", imu.getAngle());
     }
 }

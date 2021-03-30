@@ -73,7 +73,7 @@ public final class Constants {
 
     public static final double ODOMETRY_WHEEL_METERS_PER_PULSE_L = 0.000155852;
     public static final double ODOMETRY_WHEEL_METERS_PER_PULSE_R = 0.000155852;
-    public static final double ODOMETRY_WHEEL_METERS_PER_PULSE_B = 0.000077926;
+    public static final double ODOMETRY_WHEEL_METERS_PER_PULSE_B = 0.000155852;
     
     public static final double ODOMETRY_WHEEL_BACK_INCHES = 13.755204; //distance from the center of the robot to the center of the odometry wheels in inches
     public static final double ODOMETRY_WHEEL_SIDE_INCHES = 12.876524; //left and right radii should be the same
