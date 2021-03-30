@@ -209,5 +209,8 @@ public class Drive_s extends SubsystemBase{
         poseEstimator.update(imu.getRotation2d(), getWheelSpeeds());
         poseEstimator.addVisionMeasurement(odometry.getPoseMeters(), Timer.getFPGATimestamp());
         SmartDashboard.putNumber("gyro_angle", imu.getAngle());
+        SmartDashboard.putNumber("pose_x", getPose().getX());
+        SmartDashboard.putNumber("pose_y", getPose().getY());
+        SmartDashboard.putNumber("pose_theta", getPose().getRotation().getDegrees());
     }
 }
