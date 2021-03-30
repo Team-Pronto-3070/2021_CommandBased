@@ -66,6 +66,7 @@ public class RobotContainer {
     SmartDashboard.putData(autoChooser);
 
     m_drive.setDefaultCommand(new TeleopCommand(m_drive, oi));
+    m_intake.setDefaultCommand(new RunCommand(() -> m_intake.set(0), m_intake));
 
     // Configure the button bindings
     configureButtonBindings();
