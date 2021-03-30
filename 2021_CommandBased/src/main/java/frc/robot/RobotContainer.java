@@ -87,18 +87,18 @@ public class RobotContainer {
    */
   private void configureButtonBindings() {
 
-    oi.addButton("btn1", 1);
-    oi.addButton("btn3", 3);
-    oi.addButton("btn2", 2);
-    oi.addButton("btn4", 4);
-    oi.addButton("btn5", 5);
+    oi.addButton("intake_in", 1);
+    oi.addButton("intake_out", 2);
+    oi.addButton("autoInit", 11);
+    oi.addButton("auto", 12);
+    oi.addButton("teleopRotationOffset", 7);
 
     // Referencing the added buttons when pressed
-    oi.getButton("btn1").whileHeld(new InstantCommand(() -> m_intake.set(Constants.IN_SPEED), m_intake), true);
-    oi.getButton("btn2").whileHeld(new InstantCommand(() -> m_intake.set(Constants.OUT_SPEED), m_intake), true);
+    oi.getButton("intake_in").whileHeld(new InstantCommand(() -> m_intake.set(Constants.IN_SPEED), m_intake), true);
+    oi.getButton("intake_out").whileHeld(new InstantCommand(() -> m_intake.set(Constants.OUT_SPEED), m_intake), true);
 
     //when pressed, initialize odometry and move to starting location for autonomous
-    oi.getButton("btn3").whenPressed(new SequentialCommandGroup(
+    oi.getButton("autoInit").whenPressed(new SequentialCommandGroup(
                                               new InstantCommand(() -> m_drive.resetOdometry(Constants.INITIAL_POSE), m_drive),
                                               new SelectCommand(Map.ofEntries(
                                                                     Map.entry(autoOptions.BARREL, new XdriveTrajectoryCommand(generateInitTrajectory("paths/BarrelPath.wpilib.json"), m_drive)),
@@ -107,11 +107,12 @@ public class RobotContainer {
                                                                     Map.entry(autoOptions.GALACTICSEARCH, new XdriveTrajectoryCommand(generateInitTrajectory("paths/aRed.wpilib.json"), m_drive))),
                                                                 autoChooser::getSelected)));
     //when pressed, run autonomous with a timer
-    oi.getButton("btn4").whenPressed(new SequentialCommandGroup(
+    oi.getButton("auto").whenPressed(new SequentialCommandGroup(
                                               new InstantCommand(() -> startTime = timer.get()),
                                               new ParallelDeadlineGroup(
                                                   getAutonomousCommand(),
                                                   new RunCommand(() -> SmartDashboard.putNumber("Autonomous Time", timer.get() - startTime)))));
+    oi.getButton("teleopRotationOffset").whenPressed(new InstantCommand(() -> m_drive.setTeleopRotationOffset(m_drive.getPose().getRotation()), m_drive));
   }
 
   /**

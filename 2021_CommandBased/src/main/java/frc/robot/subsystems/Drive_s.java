@@ -46,6 +46,8 @@ public class Drive_s extends SubsystemBase{
     private final XdrivePoseEstimator poseEstimator;
 
     private AHRS imu;
+
+    private Rotation2d teleopRotationOffset = new Rotation2d();
     
     public Drive_s(){
         talFL = new TalonFX(Constants.TAL_FL_PORT);
@@ -191,6 +193,14 @@ public class Drive_s extends SubsystemBase{
             DriverStation.reportError("Unable to open trajectory: " + JSONPath, ex.getStackTrace());
         }
         return trajectory;
+    }
+
+    public Rotation2d getTeleopRotation() {
+        return getPose().getRotation().plus(teleopRotationOffset);
+    }
+
+    public void setTeleopRotationOffset(Rotation2d offset) {
+        teleopRotationOffset = offset;
     }
 
     @Override
