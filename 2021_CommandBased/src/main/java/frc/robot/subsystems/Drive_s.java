@@ -84,7 +84,7 @@ public class Drive_s extends SubsystemBase{
         //initialize odometry
         odometry = new XdriveOdometry();
 
-        poseEstimator = new XdrivePoseEstimator(new Rotation2d(Units.degreesToRadians(imu.getAngle())),
+        poseEstimator = new XdrivePoseEstimator(imu.getRotation2d(),
                                                 Constants.INITIAL_POSE,
                                                 kinematics,
                                                 Constants.STATE_STD_DEVS,
@@ -147,7 +147,7 @@ public class Drive_s extends SubsystemBase{
 
     public void resetOdometry(Pose2d pose) {
         odometry.resetPosition(pose);
-        poseEstimator.resetPosition(pose, new Rotation2d(Units.degreesToRadians(imu.getAngle())));
+        poseEstimator.resetPosition(pose, imu.getRotation2d());
     }
 
     public XdriveKinematics getKinematics() {
@@ -196,7 +196,7 @@ public class Drive_s extends SubsystemBase{
     @Override
     public void periodic() {
         odometry.update();
-        poseEstimator.update(new Rotation2d(Units.degreesToRadians(imu.getAngle())), getWheelSpeeds());
+        poseEstimator.update(imu.getRotation2d(), getWheelSpeeds());
         poseEstimator.addVisionMeasurement(odometry.getPoseMeters(), Timer.getFPGATimestamp());
         SmartDashboard.putNumber("gyro_angle", imu.getAngle());
     }
