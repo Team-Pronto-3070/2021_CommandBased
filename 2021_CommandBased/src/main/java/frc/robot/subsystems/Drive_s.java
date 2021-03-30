@@ -6,6 +6,7 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.geometry.Pose2d;
 import edu.wpi.first.wpilibj.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.geometry.Translation2d;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.trajectory.Trajectory;
 import edu.wpi.first.wpilibj.trajectory.TrajectoryUtil;
@@ -48,6 +49,8 @@ public class Drive_s extends SubsystemBase{
     private AHRS imu;
 
     private Rotation2d teleopRotationOffset = new Rotation2d();
+
+    private Field2d field = new Field2d();
     
     public Drive_s(){
         talFL = new TalonFX(Constants.TAL_FL_PORT);
@@ -92,6 +95,8 @@ public class Drive_s extends SubsystemBase{
                                                 Constants.STATE_STD_DEVS,
                                                 Constants.IMU_STD_DEVS,
                                                 Constants.ODOMETRY_STD_DEVS);
+        
+        SmartDashboard.putData("Field", field);
     }
 
     /**
@@ -207,10 +212,11 @@ public class Drive_s extends SubsystemBase{
     public void periodic() {
         odometry.update();
         poseEstimator.update(imu.getRotation2d(), getWheelSpeeds());
-        poseEstimator.addVisionMeasurement(odometry.getPoseMeters(), Timer.getFPGATimestamp());
+//        poseEstimator.addVisionMeasurement(odometry.getPoseMeters(), Timer.getFPGATimestamp());
         SmartDashboard.putNumber("gyro_angle", imu.getAngle());
         SmartDashboard.putNumber("pose_x", getPose().getX());
         SmartDashboard.putNumber("pose_y", getPose().getY());
         SmartDashboard.putNumber("pose_theta", getPose().getRotation().getDegrees());
+        field.setRobotPose(getPose());
     }
 }
