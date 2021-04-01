@@ -36,7 +36,7 @@ import edu.wpi.first.wpiutil.math.numbers.N3;
  *
  * <p><strong> x = [[x, y, theta]]^T </strong> in the field-coordinate system.
  *
- * <p><strong> u = [[vx, vy, theta]]^T </strong> in the field-coordinate system.
+ * <p><strong> u = [[vx, vy, omega]]^T </strong> in the field-coordinate system.
  *
  * <p><strong> y = [[x, y, theta]]^T </strong> in field coords from vision, or <strong> y =
  * [[theta]]^T </strong> from the gyro.

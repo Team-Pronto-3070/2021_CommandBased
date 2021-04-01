@@ -2,7 +2,6 @@ package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.geometry.Pose2d;
 import edu.wpi.first.wpilibj.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.geometry.Translation2d;
@@ -77,6 +76,11 @@ public class Drive_s extends SubsystemBase{
 		talFR.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor);
 		talBL.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor);
         talBR.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor);
+
+        talFL.configSelectedFeedbackCoefficient(Constants.TICKMS_TO_MSEC);
+        talFR.configSelectedFeedbackCoefficient(Constants.TICKMS_TO_MSEC);
+        talBL.configSelectedFeedbackCoefficient(Constants.TICKMS_TO_MSEC);
+        talBR.configSelectedFeedbackCoefficient(Constants.TICKMS_TO_MSEC);
         
         imu = new AHRS(Constants.IMU_PORT);
 
@@ -168,14 +172,10 @@ public class Drive_s extends SubsystemBase{
      * @return the current velocity of each wheel in m/s
      */
     public XdriveWheelSpeeds getWheelSpeeds() {
-        //Use encoders + encoder constants to fill this method
-        
-        double FL_V = talFL.getSelectedSensorVelocity() * Constants.TICKMS_TO_MSEC;
-        double FR_V = talFR.getSelectedSensorVelocity() * Constants.TICKMS_TO_MSEC;
-        double BL_V = talBL.getSelectedSensorVelocity() * Constants.TICKMS_TO_MSEC;
-        double BR_V = talBR.getSelectedSensorVelocity() * Constants.TICKMS_TO_MSEC;
-        
-        return new XdriveWheelSpeeds(FL_V, FR_V, BL_V, BR_V);
+        return new XdriveWheelSpeeds(talFL.getSelectedSensorVelocity(),
+                                     talFR.getSelectedSensorVelocity(),
+                                     talBL.getSelectedSensorVelocity(),
+                                     talBR.getSelectedSensorVelocity());
     }
 
     /**
