@@ -16,6 +16,7 @@ import edu.wpi.first.wpiutil.math.Nat;
 import edu.wpi.first.wpiutil.math.VecBuilder;
 import edu.wpi.first.wpiutil.math.numbers.N1;
 import edu.wpi.first.wpiutil.math.numbers.N3;
+import frc.robot.Constants;
 
 /**
  * This class wraps an {@link UnscentedKalmanFilter Unscented Kalman Filter} to fuse
@@ -37,12 +38,13 @@ import edu.wpi.first.wpiutil.math.numbers.N3;
  *
  * <p><strong> u = [[vx, vy, omega]]^T </strong> in the field-coordinate system.
  *
- * <p><strong> y = [[x, y, theta]]^T </strong> in field coords from vision, or <strong> y =
+ * <p><strong> y = [[x, y, theta]]^T </strong> in field coords from odometry, or <strong> y =
  * [[theta]]^T </strong> from the gyro.
  */
 public class XdrivePoseEstimator {
-  private final UnscentedKalmanFilter<N3, N3, N1> m_observer;
+  private final UnscentedKalmanFilter<N3, N3, N3> m_observer;
   private final XdriveKinematics m_kinematics;
+  private final KalmanFilterLatencyCompensator<N3, N3, N3> m_latencyCompensator;
 
   private final double m_nominalDt; // Seconds
   private double m_prevTimeSeconds = -1.0;
@@ -50,7 +52,7 @@ public class XdrivePoseEstimator {
   private Rotation2d m_gyroOffset;
   private Rotation2d m_previousAngle;
 
-  private Matrix<N3, N3> m_odometryContR;
+  private Matrix<N1, N1> m_gyroContR;
 
   /**
    * Constructs a XdrivePoseEstimator.
@@ -73,14 +75,14 @@ public class XdrivePoseEstimator {
       Pose2d initialPoseMeters,
       XdriveKinematics kinematics,
       Matrix<N3, N1> stateStdDevs,
-      Matrix<N1, N1> localMeasurementStdDevs,
+      Matrix<N1, N1> gyroMeasurementStdDevs,
       Matrix<N3, N1> odometryMeasurementStdDevs) {
     this(
         gyroAngle,
         initialPoseMeters,
         kinematics,
         stateStdDevs,
-        localMeasurementStdDevs,
+        gyroMeasurementStdDevs,
         odometryMeasurementStdDevs,
         0.02);
   }
@@ -108,7 +110,7 @@ public class XdrivePoseEstimator {
       Pose2d initialPoseMeters,
       XdriveKinematics kinematics,
       Matrix<N3, N1> stateStdDevs,
-      Matrix<N1, N1> localMeasurementStdDevs,
+      Matrix<N1, N1> gyroMeasurementStdDevs,
       Matrix<N3, N1> odometryMeasurementStdDevs,
       double nominalDtSeconds) {
     m_nominalDt = nominalDtSeconds;
@@ -116,20 +118,21 @@ public class XdrivePoseEstimator {
     m_observer =
         new UnscentedKalmanFilter<>(
             Nat.N3(),
-            Nat.N1(),
+            Nat.N3(),
             (x, u) -> u,
-            (x, u) -> x.extractRowVector(2),
+            (x, u) -> x,
             stateStdDevs,
-            localMeasurementStdDevs,
+            odometryMeasurementStdDevs,
             AngleStatistics.angleMean(2),
-            AngleStatistics.angleMean(0),
+            AngleStatistics.angleMean(2),
             AngleStatistics.angleResidual(2),
-            AngleStatistics.angleResidual(0),
+            AngleStatistics.angleResidual(2),
             AngleStatistics.angleAdd(2),
             m_nominalDt);
     m_kinematics = kinematics;
+    m_latencyCompensator = new KalmanFilterLatencyCompensator<>();
 
-    m_odometryContR = StateSpaceUtil.makeCovarianceMatrix(Nat.N3(), odometryMeasurementStdDevs);
+    m_gyroContR = StateSpaceUtil.makeCovarianceMatrix(Nat.N1(), gyroMeasurementStdDevs);
 
     m_gyroOffset = initialPoseMeters.getRotation().minus(gyroAngle);
     m_previousAngle = initialPoseMeters.getRotation();
@@ -203,19 +206,28 @@ public class XdrivePoseEstimator {
     var u = VecBuilder.fill(fieldRelativeVelocities.getX(), fieldRelativeVelocities.getY(), omega);
     m_previousAngle = angle;
 
-    var localY = VecBuilder.fill(angle.getRadians());
+    m_latencyCompensator.addObserverState(m_observer, u, StateSpaceUtil.poseTo3dVector(odometryMeasurement), currentTimeSeconds);
+
     m_observer.predict(u, dt);
-    m_observer.correct(u, localY);
-    m_observer.correct(
-      Nat.N3(),
-      u,
-      StateSpaceUtil.poseTo3dVector(odometryMeasurement),
-      (xv, uv) -> xv,
-      m_odometryContR,
-      AngleStatistics.angleMean(2),
-      AngleStatistics.angleResidual(2),
-      AngleStatistics.angleResidual(2),
-      AngleStatistics.angleAdd(2));
+    m_observer.correct(u, StateSpaceUtil.poseTo3dVector(odometryMeasurement));
+
+    m_latencyCompensator.applyPastGlobalMeasurement(
+      Nat.N1(),
+      m_observer,
+      m_nominalDt,
+      VecBuilder.fill(angle.getRadians()),
+      (u1, y) ->
+            m_observer.correct(
+                Nat.N1(),
+                u,
+                y,
+                (x, u2) -> x.extractRowVector(2),
+                m_gyroContR,
+                AngleStatistics.angleMean(0),
+                AngleStatistics.angleResidual(2),
+                AngleStatistics.angleResidual(0),
+                AngleStatistics.angleAdd(2)),
+      currentTimeSeconds - Constants.IMU_LATENCY);
 
     return getEstimatedPosition();
   }
