@@ -150,6 +150,7 @@ public class XdrivePoseEstimator {
   public void resetPosition(Pose2d poseMeters, Rotation2d gyroAngle) {
     m_previousAngle = poseMeters.getRotation();
     m_gyroOffset = getEstimatedPosition().getRotation().minus(gyroAngle);
+    m_observer.reset();
     m_observer.setXhat(StateSpaceUtil.poseTo3dVector(poseMeters));
   }
 
