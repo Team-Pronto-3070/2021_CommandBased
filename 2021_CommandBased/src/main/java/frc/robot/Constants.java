@@ -95,7 +95,7 @@ public final class Constants {
     public static final double OMEGA_COEFFICENT = 1;
 
     //Ratio of Ticks per 100 milliseconds (output of getSelectedSensorVelocity) to meters per second
-    public static final double TICKMS_TO_MSEC = 0.0011688957;
+    public static final double TICKMS_TO_MSEC = 0.0001833558212343308;
 
     //pose estimator standard deviations
     public static final Vector<N3> STATE_STD_DEVS = VecBuilder.fill(0.25, 0.25, Units.degreesToRadians(30));

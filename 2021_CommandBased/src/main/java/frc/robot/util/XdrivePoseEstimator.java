@@ -9,7 +9,6 @@ import edu.wpi.first.wpilibj.estimator.UnscentedKalmanFilter;
 import edu.wpi.first.wpilibj.geometry.Pose2d;
 import edu.wpi.first.wpilibj.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.geometry.Translation2d;
-import edu.wpi.first.wpilibj.math.Discretization;
 import edu.wpi.first.wpilibj.math.StateSpaceUtil;
 import edu.wpi.first.wpiutil.WPIUtilJNI;
 import edu.wpi.first.wpiutil.math.Matrix;
@@ -36,7 +35,7 @@ import edu.wpi.first.wpiutil.math.numbers.N3;
  *
  * <p><strong> x = [[x, y, theta]]^T </strong> in the field-coordinate system.
  *
- * <p><strong> u = [[vx, vy, theta]]^T </strong> in the field-coordinate system.
+ * <p><strong> u = [[vx, vy, omega]]^T </strong> in the field-coordinate system.
  *
  * <p><strong> y = [[x, y, theta]]^T </strong> in field coords from vision, or <strong> y =
  * [[theta]]^T </strong> from the gyro.
@@ -51,7 +50,7 @@ public class XdrivePoseEstimator {
   private Rotation2d m_gyroOffset;
   private Rotation2d m_previousAngle;
 
-  private Matrix<N3, N3> m_visionDiscreteR;
+  private Matrix<N3, N3> m_odometryContR;
 
   /**
    * Constructs a XdrivePoseEstimator.
@@ -65,7 +64,7 @@ public class XdrivePoseEstimator {
    * @param localMeasurementStdDevs Standard deviations of the encoder and gyro measurements.
    *     Increase these numbers to trust sensor readings from encoders and gyros less. This matrix
    *     is in the form [theta], with units in radians.
-   * @param visionMeasurementStdDevs Standard deviations of the vision measurements. Increase these
+   * @param odometryMeasurementStdDevs Standard deviations of the vision measurements. Increase these
    *     numbers to trust global measurements from vision less. This matrix is in the form [x, y,
    *     theta]^T, with units in meters and radians.
    */
@@ -75,14 +74,14 @@ public class XdrivePoseEstimator {
       XdriveKinematics kinematics,
       Matrix<N3, N1> stateStdDevs,
       Matrix<N1, N1> localMeasurementStdDevs,
-      Matrix<N3, N1> visionMeasurementStdDevs) {
+      Matrix<N3, N1> odometryMeasurementStdDevs) {
     this(
         gyroAngle,
         initialPoseMeters,
         kinematics,
         stateStdDevs,
         localMeasurementStdDevs,
-        visionMeasurementStdDevs,
+        odometryMeasurementStdDevs,
         0.02);
   }
 
@@ -98,7 +97,7 @@ public class XdrivePoseEstimator {
    * @param localMeasurementStdDevs Standard deviations of the encoder and gyro measurements.
    *     Increase these numbers to trust sensor readings from encoders and gyros less. This matrix
    *     is in the form [theta], with units in radians.
-   * @param visionMeasurementStdDevs Standard deviations of the vision measurements. Increase these
+   * @param odometryMeasurementStdDevs Standard deviations of the vision measurements. Increase these
    *     numbers to trust global measurements from vision less. This matrix is in the form [x, y,
    *     theta]^T, with units in meters and radians.
    * @param nominalDtSeconds The time in seconds between each robot loop.
@@ -110,7 +109,7 @@ public class XdrivePoseEstimator {
       XdriveKinematics kinematics,
       Matrix<N3, N1> stateStdDevs,
       Matrix<N1, N1> localMeasurementStdDevs,
-      Matrix<N3, N1> visionMeasurementStdDevs,
+      Matrix<N3, N1> odometryMeasurementStdDevs,
       double nominalDtSeconds) {
     m_nominalDt = nominalDtSeconds;
 
@@ -130,8 +129,7 @@ public class XdrivePoseEstimator {
             m_nominalDt);
     m_kinematics = kinematics;
 
-    var visionContR = StateSpaceUtil.makeCovarianceMatrix(Nat.N3(), visionMeasurementStdDevs);
-    m_visionDiscreteR = Discretization.discretizeR(visionContR, m_nominalDt);
+    m_odometryContR = StateSpaceUtil.makeCovarianceMatrix(Nat.N3(), odometryMeasurementStdDevs);
 
     m_gyroOffset = initialPoseMeters.getRotation().minus(gyroAngle);
     m_previousAngle = initialPoseMeters.getRotation();
@@ -152,6 +150,7 @@ public class XdrivePoseEstimator {
   public void resetPosition(Pose2d poseMeters, Rotation2d gyroAngle) {
     m_previousAngle = poseMeters.getRotation();
     m_gyroOffset = getEstimatedPosition().getRotation().minus(gyroAngle);
+    m_observer.reset();
     m_observer.setXhat(StateSpaceUtil.poseTo3dVector(poseMeters));
   }
 
@@ -213,7 +212,7 @@ public class XdrivePoseEstimator {
       u,
       StateSpaceUtil.poseTo3dVector(odometryMeasurement),
       (xv, uv) -> xv,
-      m_visionDiscreteR,
+      m_odometryContR,
       AngleStatistics.angleMean(2),
       AngleStatistics.angleResidual(2),
       AngleStatistics.angleResidual(2),
