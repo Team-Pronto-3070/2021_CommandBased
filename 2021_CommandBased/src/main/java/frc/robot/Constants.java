@@ -51,24 +51,24 @@ public final class Constants {
     public static final double MAX_ANGULAR_ACCELERATION = 3; //in radians/second^2
 
     //PID Constants
-    public static final PIDController X_PID_CONTROLLER = new PIDController(1, 0, 0);
-    public static final PIDController Y_PID_CONTROLLER = new PIDController(1, 0, 0);
-    public static final ProfiledPIDController THETA_PID_CONTROLLER = new ProfiledPIDController(1, 0, 0, new TrapezoidProfile.Constraints(MAX_ANGULAR_VELOCITY, MAX_ANGULAR_ACCELERATION));
+    public static final PIDController X_PID_CONTROLLER = new PIDController(0.1, 0, 0);
+    public static final PIDController Y_PID_CONTROLLER = new PIDController(0.1, 0, 0);
+    public static final ProfiledPIDController THETA_PID_CONTROLLER = new ProfiledPIDController(0.1, 0, 0, new TrapezoidProfile.Constraints(MAX_ANGULAR_VELOCITY, MAX_ANGULAR_ACCELERATION));
 
-    public static final PIDController FL_PID = new PIDController(0.5, 0, 0);
-    public static final PIDController FR_PID = new PIDController(0.5, 0, 0);
-    public static final PIDController BL_PID = new PIDController(0.5, 0, 0);
-    public static final PIDController BR_PID = new PIDController(0.5, 0, 0);
+    public static final PIDController FL_PID = new PIDController(0.1, 0, 0);
+    public static final PIDController FR_PID = new PIDController(0.1, 0, 0);
+    public static final PIDController BL_PID = new PIDController(0.1, 0, 0);
+    public static final PIDController BR_PID = new PIDController(0.1, 0, 0);
 
-    public static final SimpleMotorFeedforward FEEDFORWARD = new SimpleMotorFeedforward(0, 0.2, 0);
+    public static final SimpleMotorFeedforward FEEDFORWARD = new SimpleMotorFeedforward(0, 0.25044035865390880768, 0);
     
     //odometry constants
-    public static final int[] ODOMETRY_WHEEL_LEFT_PORT = new int[] {0, 1}; //dio pins for odometry wheel encoders
-    public static final int[] ODOMETRY_WHEEL_RIGHT_PORT = new int[] {2, 3};
-    public static final int[] ODOMETRY_WHEEL_BACK_PORT = new int[] {4, 5};
+    public static final int[] ODOMETRY_WHEEL_LEFT_PORT = new int[] {14, 15}; //dio pins for odometry wheel encoders
+    public static final int[] ODOMETRY_WHEEL_RIGHT_PORT = new int[] {12, 13};
+    public static final int[] ODOMETRY_WHEEL_BACK_PORT = new int[] {10, 11};
 
-    public static final boolean ODOMETRY_WHEEL_LEFT_REVERSED = false;
-    public static final boolean ODOMETRY_WHEEL_RIGHT_REVERSED = false;
+    public static final boolean ODOMETRY_WHEEL_LEFT_REVERSED = true;
+    public static final boolean ODOMETRY_WHEEL_RIGHT_REVERSED = true;
     public static final boolean ODOMETRY_WHEEL_BACK_REVERSED = false;
 
     public static final double ODOMETRY_WHEEL_METERS_PER_PULSE_L = 0.000155852;

@@ -149,7 +149,8 @@ public class Drive_s extends SubsystemBase{
 
     public Pose2d getPose() {
 //        return odometry.getPoseMeters();
-        return poseEstimator.getEstimatedPosition();
+//        return poseEstimator.getEstimatedPosition();
+        return odometry.getPoseWith2Encoders(imu.getRotation2d());
     }
 
     public void resetOdometry(Pose2d pose) {
@@ -211,11 +212,19 @@ public class Drive_s extends SubsystemBase{
     @Override
     public void periodic() {
         odometry.update();
-        poseEstimator.update(imu.getRotation2d(), getWheelSpeeds(), odometry.getPoseMeters());
+        poseEstimator.update(imu.getRotation2d(), getWheelSpeeds(), odometry.getPoseWith2Encoders(imu.getRotation2d()));
+        
+        var estimatedPose = poseEstimator.getEstimatedPosition();
         SmartDashboard.putNumber("gyro_angle", imu.getAngle());
-        SmartDashboard.putNumber("pose_x", getPose().getX());
-        SmartDashboard.putNumber("pose_y", getPose().getY());
-        SmartDashboard.putNumber("pose_theta", getPose().getRotation().getDegrees());
+        SmartDashboard.putNumber("pose_x", estimatedPose.getX());
+        SmartDashboard.putNumber("pose_y", estimatedPose.getY());
+        SmartDashboard.putNumber("pose_theta", estimatedPose.getRotation().getDegrees());
+        
         field.setRobotPose(getPose());
+
+        var odometryPose = odometry.getPoseWith2Encoders(imu.getRotation2d());
+        SmartDashboard.putNumber("odometry_x", odometryPose.getX());
+        SmartDashboard.putNumber("odometry_y", odometryPose.getY());
+        SmartDashboard.putNumber("odometry_theta", odometryPose.getRotation().getDegrees());
     }
 }

@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.geometry.Pose2d;
 import edu.wpi.first.wpilibj.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.geometry.Transform2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Units;
 
 import frc.robot.Constants;
@@ -98,6 +99,19 @@ public class XdriveOdometry {
     y = backDist + (Units.inchesToMeters(Constants.ODOMETRY_WHEEL_BACK_INCHES) * theta);
     
     return new Pose2d(x, y, new Rotation2d(theta)).plus(new Transform2d(new Pose2d(), initialPose));
+  }
+
+  public Pose2d getPoseWith2Encoders(Rotation2d gyroAngle) {
+    rightDist = rightEncoder.getDistance();
+    backDist = backEncoder.getDistance();
+
+    SmartDashboard.putNumber("right_encoder", rightDist);
+    SmartDashboard.putNumber("back_encoder", backDist);
+ 
+    x = rightDist - (gyroAngle.getRadians() * Units.inchesToMeters(Constants.ODOMETRY_WHEEL_SIDE_INCHES));
+    y = backDist + (Units.inchesToMeters(Constants.ODOMETRY_WHEEL_BACK_INCHES) * gyroAngle.getRadians());
+    
+    return new Pose2d(x, y, gyroAngle).plus(new Transform2d(new Pose2d(), initialPose));
   }
 
   /**
