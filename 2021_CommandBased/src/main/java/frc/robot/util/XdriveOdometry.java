@@ -4,10 +4,11 @@
 
 package frc.robot.util;
 
+import org.ejml.simple.SimpleMatrix;
+
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.geometry.Pose2d;
 import edu.wpi.first.wpilibj.geometry.Rotation2d;
-import edu.wpi.first.wpilibj.geometry.Transform2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Units;
 
@@ -15,7 +16,7 @@ import frc.robot.Constants;
 
 /**
  * Class for x-drive odometry. Odometry allows you to track the robot's position on the field
- * over a course of a match using readings from your x-wheel encoders.
+ * over a course of a match using readings from your odometry wheels.
  *
  * <p>Teams can use odometry during the autonomous period for complex tasks like path following.
  * Furthermore, odometry can be used for latency compensation when using computer-vision systems.
@@ -28,13 +29,8 @@ public class XdriveOdometry {
   private Encoder rightEncoder;
   private Encoder backEncoder;
 
-  private double leftDist;
-  private double rightDist;
-  private double backDist;
-
-  private double x;
-  private double y;
-  private double theta;
+  private final SimpleMatrix forwardKinematics;
+  private final SimpleMatrix inverseKinematics;
 
   /**
    * Constructs a XdriveOdometry object.
@@ -56,6 +52,11 @@ public class XdriveOdometry {
     leftEncoder.setDistancePerPulse(Constants.ODOMETRY_WHEEL_METERS_PER_PULSE_L);
     rightEncoder.setDistancePerPulse(Constants.ODOMETRY_WHEEL_METERS_PER_PULSE_R);
     backEncoder.setDistancePerPulse(Constants.ODOMETRY_WHEEL_METERS_PER_PULSE_B);
+
+    forwardKinematics = new SimpleMatrix(new double[][] {{ 1, 0, -1 * Units.inchesToMeters(Constants.ODOMETRY_WHEEL_SIDE_INCHES)},
+                                                         {-1, 0, -1 * Units.inchesToMeters(Constants.ODOMETRY_WHEEL_SIDE_INCHES)},
+                                                         { 0, 1, -1 * Units.inchesToMeters(Constants.ODOMETRY_WHEEL_BACK_INCHES)}});
+    inverseKinematics = forwardKinematics.invert();
   }
 
   /**
@@ -83,22 +84,11 @@ public class XdriveOdometry {
    * @return The pose of the robot (x and y are in meters).
    */
   public Pose2d getPoseMeters() {
-    leftDist = leftEncoder.getDistance();
-    rightDist = rightEncoder.getDistance();
-    backDist = backEncoder.getDistance();
-
-    //leftdist = x - r*theta
-    //rightdist = x + r*theta
-    //backDist = y - r_b * theta
-    //x = (L + R) / 2
-    //theta = (R - x) / r
-    //y = B + (r_b * theta)
-
-    x = (leftDist + rightDist) / 2;
-    theta = (rightDist - x) / Units.inchesToMeters(Constants.ODOMETRY_WHEEL_SIDE_INCHES);
-    y = backDist + (Units.inchesToMeters(Constants.ODOMETRY_WHEEL_BACK_INCHES) * theta);
-    
-    return new Pose2d(x, y, new Rotation2d(theta)).plus(new Transform2d(new Pose2d(), initialPose));
+    var poseVector = inverseKinematics.mult(new SimpleMatrix(new double[][] {{leftEncoder.getDistance() },
+                                                                             {rightEncoder.getDistance()},
+                                                                             {backEncoder.getDistance() }}));
+    return new Pose2d(poseVector.get(0,0), poseVector.get(1,0), new Rotation2d(poseVector.get(2,0)))
+                    .relativeTo(initialPose);
   }
 
   /*
