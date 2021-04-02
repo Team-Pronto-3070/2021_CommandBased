@@ -228,9 +228,9 @@ public class Drive_s extends SubsystemBase{
         field.setRobotPose(poseEstimator.getEstimatedPosition());
         field.getObject("odometry").setPose(odometry.getPoseMeters());
 
-        SmartDashboard.putNumber("FL (m/s)", talFL.getSelectedSensorVelocity());
-        SmartDashboard.putNumber("FR (m/s)", talFR.getSelectedSensorVelocity());
-        SmartDashboard.putNumber("BL (m/s)", talBL.getSelectedSensorVelocity());
-        SmartDashboard.putNumber("BR (m/s)", talBR.getSelectedSensorVelocity());
+        SmartDashboard.putNumber("FL velocity", talFL.getSelectedSensorVelocity());
+        SmartDashboard.putNumber("FR velocity", talFR.getSelectedSensorVelocity());
+        SmartDashboard.putNumber("BL velocity", talBL.getSelectedSensorVelocity());
+        SmartDashboard.putNumber("BR velocity", talBR.getSelectedSensorVelocity());
     }
 }

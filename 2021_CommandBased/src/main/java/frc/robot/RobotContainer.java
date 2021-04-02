@@ -77,8 +77,8 @@ public class RobotContainer {
     return TrajectoryGenerator.generateTrajectory(Constants.INITIAL_POSE,
                                                   List.of(),
                                                   m_drive.trajectoryFromJSON(path).getInitialPose(),
-                                                  new TrajectoryConfig(2 /*max velocity*/, 1 /*max acceleration*/)
-                                                    .addConstraint(new XdriveKinematicsConstraint(m_drive.getKinematics(), 2 /*max velocity*/)));
+                                                  new TrajectoryConfig(1 /*max velocity*/, .5 /*max acceleration*/)
+                                                    .addConstraint(new XdriveKinematicsConstraint(m_drive.getKinematics(), .5 /*max velocity*/)));
   }
 
   /**

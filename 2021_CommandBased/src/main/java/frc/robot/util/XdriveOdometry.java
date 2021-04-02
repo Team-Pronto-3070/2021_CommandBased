@@ -9,6 +9,7 @@ import org.ejml.simple.SimpleMatrix;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.geometry.Pose2d;
 import edu.wpi.first.wpilibj.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.geometry.Translation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Units;
 
@@ -54,7 +55,7 @@ public class XdriveOdometry {
     backEncoder.setDistancePerPulse(Constants.ODOMETRY_WHEEL_METERS_PER_PULSE_B);
 
     forwardKinematics = new SimpleMatrix(new double[][] {{ 1, 0, -1 * Units.inchesToMeters(Constants.ODOMETRY_WHEEL_SIDE_INCHES)},
-                                                         {-1, 0, -1 * Units.inchesToMeters(Constants.ODOMETRY_WHEEL_SIDE_INCHES)},
+                                                         { 1, 0,      Units.inchesToMeters(Constants.ODOMETRY_WHEEL_SIDE_INCHES)},
                                                          { 0, 1, -1 * Units.inchesToMeters(Constants.ODOMETRY_WHEEL_BACK_INCHES)}});
     inverseKinematics = forwardKinematics.invert();
   }
@@ -87,8 +88,10 @@ public class XdriveOdometry {
     var poseVector = inverseKinematics.mult(new SimpleMatrix(new double[][] {{leftEncoder.getDistance() },
                                                                              {rightEncoder.getDistance()},
                                                                              {backEncoder.getDistance() }}));
-    return new Pose2d(poseVector.get(0,0), poseVector.get(1,0), new Rotation2d(poseVector.get(2,0)))
-                    .relativeTo(initialPose);
+    return new Pose2d(new Translation2d(poseVector.get(0,0), poseVector.get(1,0))
+                            .rotateBy(new Rotation2d(poseVector.get(2,0))),
+                      new Rotation2d(poseVector.get(2,0)))
+                .relativeTo(initialPose);
   }
 
   /*

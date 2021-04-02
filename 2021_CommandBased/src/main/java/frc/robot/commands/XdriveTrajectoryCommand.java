@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj.controller.SimpleMotorFeedforward;
 import edu.wpi.first.wpilibj.geometry.Pose2d;
 import edu.wpi.first.wpilibj.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.kinematics.ChassisSpeeds;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.trajectory.Trajectory;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.Subsystem;
@@ -409,6 +410,11 @@ public class XdriveTrajectoryCommand extends CommandBase {
     var rearLeftSpeedSetpoint = targetWheelSpeeds.rearLeftMetersPerSecond;
     var frontRightSpeedSetpoint = targetWheelSpeeds.frontRightMetersPerSecond;
     var rearRightSpeedSetpoint = targetWheelSpeeds.rearRightMetersPerSecond;
+
+    SmartDashboard.putNumber("FL_SETPOINT", frontLeftSpeedSetpoint);
+    SmartDashboard.putNumber("FR_SETPOINT", frontRightSpeedSetpoint);
+    SmartDashboard.putNumber("BL_SETPOINT", rearLeftSpeedSetpoint);
+    SmartDashboard.putNumber("BR_SETPOINT", rearRightSpeedSetpoint);
 
     double frontLeftOutput;
     double rearLeftOutput;
