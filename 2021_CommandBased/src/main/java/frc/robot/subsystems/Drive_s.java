@@ -5,7 +5,8 @@ import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.geometry.Pose2d;
 import edu.wpi.first.wpilibj.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.geometry.Translation2d;
-import edu.wpi.first.wpilibj.kinematics.ChassisSpeeds;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.trajectory.Trajectory;
 import edu.wpi.first.wpilibj.trajectory.TrajectoryUtil;
 import edu.wpi.first.wpilibj.util.Units;
@@ -20,9 +21,12 @@ import com.ctre.phoenix.motorcontrol.InvertType;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
 
+import com.kauailabs.navx.frc.AHRS;
+
 import frc.robot.Constants;
 import frc.robot.util.XdriveKinematics;
 import frc.robot.util.XdriveOdometry;
+import frc.robot.util.XdrivePoseEstimator;
 import frc.robot.util.XdriveWheelSpeeds;
 
 public class Drive_s extends SubsystemBase{
@@ -38,6 +42,14 @@ public class Drive_s extends SubsystemBase{
 
     //create odometry
     XdriveOdometry odometry;
+
+    private final XdrivePoseEstimator poseEstimator;
+
+    private AHRS imu;
+
+    private Rotation2d teleopRotationOffset = new Rotation2d();
+
+    private Field2d field = new Field2d();
     
     public Drive_s(){
         talFL = new TalonFX(Constants.TAL_FL_PORT);
@@ -63,7 +75,14 @@ public class Drive_s extends SubsystemBase{
         talFL.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor);
 		talFR.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor);
 		talBL.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor);
-		talBR.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor);
+        talBR.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor);
+
+        talFL.configSelectedFeedbackCoefficient(Constants.TICKMS_TO_MSEC);
+        talFR.configSelectedFeedbackCoefficient(Constants.TICKMS_TO_MSEC);
+        talBL.configSelectedFeedbackCoefficient(Constants.TICKMS_TO_MSEC);
+        talBR.configSelectedFeedbackCoefficient(Constants.TICKMS_TO_MSEC);
+        
+        imu = new AHRS(Constants.IMU_PORT);
 
         //initialize kinematics with relative locations of wheels
         kinematics = new XdriveKinematics(new Translation2d(Units.inchesToMeters(Constants.DRIVETRAIN_RADIUS_INCHES), new Rotation2d(3 * Math.PI / 4)),
@@ -73,6 +92,15 @@ public class Drive_s extends SubsystemBase{
         
         //initialize odometry
         odometry = new XdriveOdometry();
+
+        poseEstimator = new XdrivePoseEstimator(imu.getRotation2d(),
+                                                Constants.INITIAL_POSE,
+                                                kinematics,
+                                                Constants.STATE_STD_DEVS,
+                                                Constants.IMU_STD_DEVS,
+                                                Constants.ODOMETRY_STD_DEVS);
+        
+        SmartDashboard.putData("Field", field);
     }
 
     /**
@@ -125,14 +153,13 @@ public class Drive_s extends SubsystemBase{
 
     public Pose2d getPose() {
         return odometry.getPoseMeters();
+//        return poseEstimator.getEstimatedPosition();
+//        return odometry.getPoseWith2Encoders(imu.getRotation2d());
     }
 
     public void resetOdometry(Pose2d pose) {
         odometry.resetPosition(pose);
-    }
-
-    public void resetOdometry() {
-        odometry.resetPosition(new Pose2d());
+        poseEstimator.resetPosition(pose, imu.getRotation2d());
     }
 
     public XdriveKinematics getKinematics() {
@@ -146,14 +173,10 @@ public class Drive_s extends SubsystemBase{
      * @return the current velocity of each wheel in m/s
      */
     public XdriveWheelSpeeds getWheelSpeeds() {
-        //Use encoders + encoder constants to fill this method
-        
-        double FL_V = talFL.getSelectedSensorVelocity() * Constants.TICKMS_TO_MSEC;
-        double FR_V = talFR.getSelectedSensorVelocity() * Constants.TICKMS_TO_MSEC;
-        double BL_V = talBL.getSelectedSensorVelocity() * Constants.TICKMS_TO_MSEC;
-        double BR_V = talBR.getSelectedSensorVelocity() * Constants.TICKMS_TO_MSEC;
-        
-        return new XdriveWheelSpeeds(FL_V, FR_V, BL_V, BR_V);
+        return new XdriveWheelSpeeds(talFL.getSelectedSensorVelocity(),
+                                     talFR.getSelectedSensorVelocity(),
+                                     talBL.getSelectedSensorVelocity(),
+                                     talBR.getSelectedSensorVelocity());
     }
 
     /**
@@ -178,8 +201,36 @@ public class Drive_s extends SubsystemBase{
         return trajectory;
     }
 
+    public Rotation2d getTeleopRotation() {
+        return getPose().getRotation().plus(teleopRotationOffset);
+    }
+
+    public void setTeleopRotationOffset(Rotation2d offset) {
+        teleopRotationOffset = offset;
+    }
+
     @Override
     public void periodic() {
         odometry.update();
+//        poseEstimator.update(imu.getRotation2d(), getWheelSpeeds(), odometry.getPoseMeters());
+        
+        var estimatedPose = poseEstimator.getEstimatedPosition();
+        SmartDashboard.putNumber("gyro_angle", imu.getAngle());
+        SmartDashboard.putNumber("pose_x", estimatedPose.getX());
+        SmartDashboard.putNumber("pose_y", estimatedPose.getY());
+        SmartDashboard.putNumber("pose_theta", estimatedPose.getRotation().getDegrees());
+
+        var odometryPose = odometry.getPoseMeters();
+        SmartDashboard.putNumber("odometry_x", odometryPose.getX());
+        SmartDashboard.putNumber("odometry_y", odometryPose.getY());
+        SmartDashboard.putNumber("odometry_theta", odometryPose.getRotation().getDegrees());
+
+        field.setRobotPose(poseEstimator.getEstimatedPosition());
+        field.getObject("odometry").setPose(odometry.getPoseMeters());
+
+        SmartDashboard.putNumber("FL velocity", talFL.getSelectedSensorVelocity());
+        SmartDashboard.putNumber("FR velocity", talFR.getSelectedSensorVelocity());
+        SmartDashboard.putNumber("BL velocity", talBL.getSelectedSensorVelocity());
+        SmartDashboard.putNumber("BR velocity", talBR.getSelectedSensorVelocity());
     }
 }
