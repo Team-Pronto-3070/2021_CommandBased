@@ -12,6 +12,7 @@ public class Vision {
     static ArrayList<PixelPoint> targetInfo = new ArrayList<>();
     // Creates a new PhotonCamera.
     static PhotonCamera camera;
+    static PhotonPipelineResult result; 
 
     public Vision(){
         if(camera == null){
@@ -22,9 +23,10 @@ public class Vision {
     public static void takeSnapshot(){
 
         // Get the latest pipeline result.
-        PhotonPipelineResult result = camera.getLatestResult();
+        result = camera.getLatestResult();
+    }
 
-
+    public String selectPath(){
         if(result.hasTargets()){
 
             for (PhotonTrackedTarget target: result.getTargets()){
@@ -36,16 +38,25 @@ public class Vision {
                 PixelPoint info = new PixelPoint(pitch, yaw, skew, area);
 
                 targetInfo.add(info);
-
             }
         }
-    }
-
-    public String selectPath(){
         return choosePath(targetInfo);
     }
 
     public void updateProfile(String profile){
+        if(result.hasTargets()){
+
+            for (PhotonTrackedTarget target: result.getTargets()){
+                double yaw = target.getYaw();
+                double pitch = target.getPitch();
+                double area = target.getArea();
+                double skew = target.getSkew();
+
+                PixelPoint info = new PixelPoint(pitch, yaw, skew, area);
+
+                targetInfo.add(info);
+            }
+        }
         setProfiles(targetInfo, profile);
     }
 
