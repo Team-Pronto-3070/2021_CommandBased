@@ -101,6 +101,7 @@ public class XdriveOdometry {
     return new Pose2d(x, y, new Rotation2d(theta)).plus(new Transform2d(new Pose2d(), initialPose));
   }
 
+  /*
   public Pose2d getPoseWith2Encoders(Rotation2d gyroAngle) {
     rightDist = rightEncoder.getDistance();
     backDist = backEncoder.getDistance();
@@ -113,11 +114,15 @@ public class XdriveOdometry {
     
     return new Pose2d(x, y, gyroAngle).plus(new Transform2d(new Pose2d(), initialPose));
   }
+  */
 
   /**
    * 
    */
   public Pose2d update() {
+    SmartDashboard.putNumber("left_encoder", leftEncoder.getDistance());
+    SmartDashboard.putNumber("right_encoder", rightEncoder.getDistance());
+    SmartDashboard.putNumber("back_encoder", backEncoder.getDistance());
     return getPoseMeters();
   }
 }

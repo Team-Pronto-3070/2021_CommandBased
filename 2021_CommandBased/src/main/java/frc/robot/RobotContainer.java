@@ -11,6 +11,7 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.geometry.Pose2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.trajectory.Trajectory;
@@ -93,6 +94,7 @@ public class RobotContainer {
     oi.addButton("autoInit", 11);
     oi.addButton("auto", 12);
     oi.addButton("teleopRotationOffset", 7);
+    oi.addButton("resetPose", 8);
 
     // Referencing the added buttons when pressed
     oi.getButton("intake_in").whileHeld(new InstantCommand(() -> m_intake.set(Constants.IN_SPEED), m_intake), true);
@@ -114,6 +116,7 @@ public class RobotContainer {
                                                   getAutonomousCommand(),
                                                   new RunCommand(() -> SmartDashboard.putNumber("Autonomous Time", timer.get() - startTime)))));
     oi.getButton("teleopRotationOffset").whenPressed(new InstantCommand(() -> m_drive.setTeleopRotationOffset(m_drive.getPose().getRotation()), m_drive));
+    oi.getButton("resetPose").whenPressed(new InstantCommand(() -> m_drive.resetOdometry(new Pose2d()), m_drive));
   }
 
   /**
