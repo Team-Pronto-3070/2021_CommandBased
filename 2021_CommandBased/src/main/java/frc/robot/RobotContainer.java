@@ -41,6 +41,8 @@ public class RobotContainer {
 
   //Define OI object
   public OI oi = new OI();
+
+  public Vision vis = new Vision();
   
   // define subsystems
   private final Drive_s m_drive = new Drive_s();
@@ -96,6 +98,18 @@ public class RobotContainer {
     oi.addButton("teleopRotationOffset", 7);
     oi.addButton("resetPose", 8);
 
+    oi.addButton("setARed", 3);
+    oi.addButton("setABlue", 4);
+    oi.addButton("setBRed", 5);
+    oi.addButton("setBBlue", 6);
+    oi.addButton("selectPath", 10);
+
+    oi.getButton("setARed").whenPressed(new InstantCommand(() -> vis.updateProfile("aRed")));
+    oi.getButton("setABlue").whenPressed(new InstantCommand(() -> vis.updateProfile("aBlue")));
+    oi.getButton("setBRed").whenPressed(new InstantCommand(() -> vis.updateProfile("bRed")));
+    oi.getButton("setBBlue").whenPressed(new InstantCommand(() -> vis.updateProfile("bBlue")));
+    oi.getButton("selectPath").whenPressed(new InstantCommand(() -> System.out.println(vis.selectPath())));
+
     // Referencing the added buttons when pressed
     oi.getButton("intake_in").whileHeld(new InstantCommand(() -> m_intake.set(Constants.IN_SPEED), m_intake), true);
     oi.getButton("intake_out").whileHeld(new InstantCommand(() -> m_intake.set(Constants.OUT_SPEED), m_intake), true);
@@ -135,7 +149,7 @@ public class RobotContainer {
                                                                                           Map.entry("bRed", new XdriveTrajectoryCommand("paths/bRed.wpilib.json", m_drive)),
                                                                                           Map.entry("aBlue", new XdriveTrajectoryCommand("paths/aBlue.wpilib.json", m_drive)),
                                                                                           Map.entry("bBlue", new XdriveTrajectoryCommand("paths/bBlue.wpilib.json", m_drive))),
-                                                                                        () -> NetworkTableInstance.getDefault().getTable("vision").getEntry("galacticSearchPath").getString("none")),
+                                                                                          vis::selectPath),
                                                                       new RunCommand(() -> m_intake.set(Constants.IN_SPEED), m_intake)))),
                             autoChooser::getSelected);
   }
