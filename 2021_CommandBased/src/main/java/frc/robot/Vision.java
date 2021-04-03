@@ -2,8 +2,6 @@ package frc.robot;
 
 import java.util.ArrayList;
 
-import javax.swing.plaf.synth.SynthSeparatorUI;
-
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPipelineResult;
 import org.photonvision.PhotonTrackedTarget;
@@ -44,6 +42,7 @@ public class Vision {
     }
 
     public String selectPath(){
+        System.out.println("selecting path");
         Vision.takeSnapshot();
         return choosePath(targetInfo);
     }

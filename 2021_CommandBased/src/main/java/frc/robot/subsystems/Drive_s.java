@@ -122,35 +122,6 @@ public class Drive_s extends SubsystemBase{
                                     values.rearRightMetersPerSecond});
     }
 
-    /**
-     * uses PIDs to set the target velocity of each wheel
-     *  
-     * @param XdriveWheelSpeeds the target velocity of each wheel in meters/second
-     */
-//    public void setWheelSpeeds(XdriveWheelSpeeds speeds) {
-//        XdriveWheelSpeeds currentSpeeds = getWheelSpeeds();
-//        setIndividual(new XdriveWheelSpeeds(Constants.FL_PID.calculate(currentSpeeds.frontLeftMetersPerSecond, speeds.frontLeftMetersPerSecond) / Constants.MAX_WHEEL_VELOCITY,
-//                                            Constants.FR_PID.calculate(currentSpeeds.frontRightMetersPerSecond, speeds.frontRightMetersPerSecond) / Constants.MAX_WHEEL_VELOCITY,
-//                                            Constants.BL_PID.calculate(currentSpeeds.rearLeftMetersPerSecond, speeds.rearLeftMetersPerSecond) / Constants.MAX_WHEEL_VELOCITY,
-//                                            Constants.BR_PID.calculate(currentSpeeds.rearRightMetersPerSecond, speeds.rearRightMetersPerSecond) / Constants.MAX_WHEEL_VELOCITY));
-//    }
-
-    /**
-     * Sets the speed of each side of the robot, putting it into tank drive
-     * 
-     * @param leftInput Double for the speed of the left motors
-     * @param rightInput Double for the speed of the right motors
-     */
-    public void setTank(double leftInput, double rightInput){
-
-        talFL.set(ControlMode.PercentOutput, leftInput); // Set the left motors
-        talBL.set(ControlMode.PercentOutput, leftInput);
-
-        talFR.set(ControlMode.PercentOutput, rightInput); // Set the right motors
-        talBR.set(ControlMode.PercentOutput, rightInput);
-
-    }
-
     public Pose2d getPose() {
         return odometry.getPoseMeters();
 //        return poseEstimator.getEstimatedPosition();
