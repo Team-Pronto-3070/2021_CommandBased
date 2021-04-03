@@ -2,6 +2,8 @@ package frc.robot;
 
 import java.util.ArrayList;
 
+import javax.swing.plaf.synth.SynthSeparatorUI;
+
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPipelineResult;
 import org.photonvision.PhotonTrackedTarget;
@@ -49,7 +51,10 @@ public class Vision {
     public void updateProfile(String profile){
         Vision.takeSnapshot();
         setProfiles(targetInfo, profile);
+        System.out.println(getPathInfo(profile));
     }
+
+    
 
     /**
    * This is the pathing section!! I know it's excessibe; I'll admit, I just wanted to see how enums worked.
@@ -108,5 +113,32 @@ public class Vision {
         }
 
         return chosenPath;
+    }
+
+
+
+    public String getPathInfo(String profile){
+        String output;
+
+        if(profile.equals("aRed")){
+            output = "Red A: pitch: "  + ARED_POINTS[0] + "yaw: " + ARED_POINTS[1] + "skew: " + ARED_POINTS[2] + "area: " + ARED_POINTS[3];
+        }
+        else if(profile.equals("aBlue")){
+            output = "Blue A: pitch: "  + ABLUE_POINTS[0] + "yaw: " + ABLUE_POINTS[1] + "skew: " + ABLUE_POINTS[2] + "area: " + ABLUE_POINTS[3];
+    
+        }
+        else if(profile.equals("bRed")){
+            output ="Red B: pitch: "  + BRED_POINTS[0] + "yaw: " + BRED_POINTS[1] + "skew: " + BRED_POINTS[2] + "area: " + BRED_POINTS[3];
+    
+        }
+        else if(profile.equals("bBlue")){
+            output ="Blue B: pitch: "  + BBLUE_POINTS[0] + "yaw: " + BBLUE_POINTS[1] + "skew: " + BBLUE_POINTS[2] + "area: " + BBLUE_POINTS[3];
+        }
+        else{
+            output = "no path selected";
+        }
+
+        return output;
+
     }
 }
