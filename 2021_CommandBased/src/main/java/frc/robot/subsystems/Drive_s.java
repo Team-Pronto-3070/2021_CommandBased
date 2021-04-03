@@ -77,10 +77,10 @@ public class Drive_s extends SubsystemBase{
 		talBL.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor);
         talBR.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor);
 
-        talFL.configSelectedFeedbackCoefficient(Constants.TICKMS_TO_MSEC);
-        talFR.configSelectedFeedbackCoefficient(Constants.TICKMS_TO_MSEC);
-        talBL.configSelectedFeedbackCoefficient(Constants.TICKMS_TO_MSEC);
-        talBR.configSelectedFeedbackCoefficient(Constants.TICKMS_TO_MSEC);
+        talFL.configSelectedFeedbackCoefficient(1);
+        talFR.configSelectedFeedbackCoefficient(1);
+        talBL.configSelectedFeedbackCoefficient(1);
+        talBR.configSelectedFeedbackCoefficient(1);
         
         imu = new AHRS(Constants.IMU_PORT);
 
@@ -173,10 +173,10 @@ public class Drive_s extends SubsystemBase{
      * @return the current velocity of each wheel in m/s
      */
     public XdriveWheelSpeeds getWheelSpeeds() {
-        return new XdriveWheelSpeeds(talFL.getSelectedSensorVelocity(),
-                                     talFR.getSelectedSensorVelocity(),
-                                     talBL.getSelectedSensorVelocity(),
-                                     talBR.getSelectedSensorVelocity());
+        return new XdriveWheelSpeeds(Constants.TICKMS_TO_MSEC * talFL.getSelectedSensorVelocity(),
+                                     Constants.TICKMS_TO_MSEC * talFR.getSelectedSensorVelocity(),
+                                     Constants.TICKMS_TO_MSEC * talBL.getSelectedSensorVelocity(),
+                                     Constants.TICKMS_TO_MSEC * talBR.getSelectedSensorVelocity());
     }
 
     /**
@@ -212,7 +212,7 @@ public class Drive_s extends SubsystemBase{
     @Override
     public void periodic() {
         odometry.update();
-//        poseEstimator.update(imu.getRotation2d(), getWheelSpeeds(), odometry.getPoseMeters());
+        poseEstimator.update(imu.getRotation2d(), getWheelSpeeds(), odometry.getPoseMeters());
         
         var estimatedPose = poseEstimator.getEstimatedPosition();
         SmartDashboard.putNumber("gyro_angle", imu.getAngle());
@@ -228,9 +228,9 @@ public class Drive_s extends SubsystemBase{
         field.setRobotPose(poseEstimator.getEstimatedPosition());
         field.getObject("odometry").setPose(odometry.getPoseMeters());
 
-        SmartDashboard.putNumber("FL velocity", talFL.getSelectedSensorVelocity());
-        SmartDashboard.putNumber("FR velocity", talFR.getSelectedSensorVelocity());
-        SmartDashboard.putNumber("BL velocity", talBL.getSelectedSensorVelocity());
-        SmartDashboard.putNumber("BR velocity", talBR.getSelectedSensorVelocity());
+        SmartDashboard.putNumber("FL velocity", Constants.TICKMS_TO_MSEC * talFL.getSelectedSensorVelocity());
+        SmartDashboard.putNumber("FR velocity", Constants.TICKMS_TO_MSEC * talFR.getSelectedSensorVelocity());
+        SmartDashboard.putNumber("BL velocity", Constants.TICKMS_TO_MSEC * talBL.getSelectedSensorVelocity());
+        SmartDashboard.putNumber("BR velocity", Constants.TICKMS_TO_MSEC * talBR.getSelectedSensorVelocity());
     }
 }

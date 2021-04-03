@@ -55,12 +55,17 @@ public final class Constants {
     public static final PIDController Y_PID_CONTROLLER = new PIDController(0.1, 0, 0);
     public static final ProfiledPIDController THETA_PID_CONTROLLER = new ProfiledPIDController(0.1, 0, 0, new TrapezoidProfile.Constraints(MAX_ANGULAR_VELOCITY, MAX_ANGULAR_ACCELERATION));
 
-    public static final PIDController FL_PID = new PIDController(0.15, 0, 0);
-    public static final PIDController FR_PID = new PIDController(0.15, 0, 0);
-    public static final PIDController BL_PID = new PIDController(0.15, 0, 0);
-    public static final PIDController BR_PID = new PIDController(0.15, 0, 0);
+    public static final PIDController FL_PID = new PIDController(0, 0, 0);
+    public static final PIDController FR_PID = new PIDController(0, 0, 0);
+    public static final PIDController BL_PID = new PIDController(0, 0, 0);
+    public static final PIDController BR_PID = new PIDController(0, 0, 0);
 
     public static final SimpleMotorFeedforward FEEDFORWARD = new SimpleMotorFeedforward(0.845/12.0, 0.25044035865390880768, 0.171/12.0);
+    
+    public static final SimpleMotorFeedforward FL_FF = new SimpleMotorFeedforward(0.057, 0.25, 0);
+    public static final SimpleMotorFeedforward FR_FF = new SimpleMotorFeedforward(0.057, 0.25, 0);
+    public static final SimpleMotorFeedforward BL_FF = new SimpleMotorFeedforward(0.057, 0.25, 0);
+    public static final SimpleMotorFeedforward BR_FF = new SimpleMotorFeedforward(0.057, 0.25, 0);
     
     //odometry constants
     public static final int[] ODOMETRY_WHEEL_LEFT_PORT = new int[] {14, 15}; //dio pins for odometry wheel encoders
@@ -100,7 +105,7 @@ public final class Constants {
     //pose estimator standard deviations
     public static final Vector<N3> STATE_STD_DEVS = VecBuilder.fill(0.25, 0.25, Units.degreesToRadians(30));
     public static final Vector<N1> IMU_STD_DEVS = VecBuilder.fill(Units.degreesToRadians(1));
-    public static final Vector<N3> ODOMETRY_STD_DEVS = VecBuilder.fill(0.1, 0.1, Units.degreesToRadians(1));
+    public static final Vector<N3> ODOMETRY_STD_DEVS = VecBuilder.fill(0.1, 0.1, Units.degreesToRadians(1)).div(0.02);
 
     public static final I2C.Port IMU_PORT = I2C.Port.kOnboard;
 }

@@ -428,22 +428,22 @@ public class XdriveTrajectoryCommand extends CommandBase {
 
     if (m_usePID) {
       final double frontLeftFeedforward =
-          m_feedforward.calculate(
+          Constants.FL_FF.calculate(
               frontLeftSpeedSetpoint,
               (frontLeftSpeedSetpoint - m_prevSpeeds.frontLeftMetersPerSecond) / dt);
 
       final double rearLeftFeedforward =
-          m_feedforward.calculate(
+          Constants.BL_FF.calculate(
               rearLeftSpeedSetpoint,
               (rearLeftSpeedSetpoint - m_prevSpeeds.rearLeftMetersPerSecond) / dt);
 
       final double frontRightFeedforward =
-          m_feedforward.calculate(
+          Constants.FR_FF.calculate(
               frontRightSpeedSetpoint,
               (frontRightSpeedSetpoint - m_prevSpeeds.frontRightMetersPerSecond) / dt);
 
       final double rearRightFeedforward =
-          m_feedforward.calculate(
+          Constants.BR_FF.calculate(
               rearRightSpeedSetpoint,
               (rearRightSpeedSetpoint - m_prevSpeeds.rearRightMetersPerSecond) / dt);
 
