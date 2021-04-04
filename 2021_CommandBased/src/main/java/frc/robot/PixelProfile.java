@@ -13,10 +13,10 @@ public class PixelProfile {
     String self;    
 
     //List of points this class contains
-    public final PixelPoint[] points;
+    public ArrayList<PixelPoint> points = new ArrayList<>();;
 
-    public PixelProfile(PixelPoint[] points, String self){
-        this.points = points;
+    public PixelProfile(ArrayList<PixelPoint> points, String self){
+        this.points.addAll(points);
         this.self = self;
     }
 
@@ -35,6 +35,7 @@ public class PixelProfile {
 
         //Contains the lowest difference between self and another profile
         double lowestDifference = compareTo(otherProfiles[0])[0];
+        closestPath = otherProfiles[0].self;
 
         //Contains the raw difference and certainty of a profile comparation
         double[] difference;
@@ -76,7 +77,7 @@ public class PixelProfile {
         double[] differenceProfile; 
 
         //Holds the length of the other profile
-        int otherProfileLength = profile.points.length;
+        int otherProfileLength = profile.points.size();
 
         //Holds how many points have been compared
         int numComparisions = 0;
@@ -98,7 +99,7 @@ public class PixelProfile {
         Collections.sort(pointListDif);
 
         //Get the length of the profile with the least points
-        int shortestLength = points.length < otherProfileLength ? points.length : otherProfileLength;
+        int shortestLength = points.size() < otherProfileLength ? points.size() : otherProfileLength;
 
 
         //Only collect the values for points that are most likely to corrospond
@@ -107,7 +108,7 @@ public class PixelProfile {
         }
 
         //divides the certainty score by the number of points tested (*3 for the amount of data in each point)
-        certaintyScore /= numComparisions * 4;
+        certaintyScore /= numComparisions * 3;
 
         //divides the calculated difference by the amount of used points compared (offsets the "less points = less difference" problem)
         differenceSum /= shortestLength;

@@ -12,32 +12,27 @@ public class PixelPoint {
     //Data fields
     final double pitch;
     final double yaw;
-    final double skew;
     final double area;
 
     //data fields in list form
     final double[] values;
 
-    public PixelPoint(double pitch, double yaw, double skew, double area){
+    public PixelPoint(double pitch, double yaw, double area){
         this.pitch = pitch;
         this.yaw = yaw;
-        this.skew = skew;
         this.area = area;
 
         this.pointTolerance = Double.MAX_VALUE;
 
-        values = new double[4];
+        values = new double[3];
         values[0] = pitch;
         values[1] = yaw;
-        values[2] = skew;
-        values[3] = area;
+        values[2] = area;
     }
 
-    public PixelPoint(double pitch, double yaw, double skew, double area, double pointTolerance){
-        this(pitch, yaw, skew, area);
-        this.pointTolerance = pointTolerance;
-
-        
+    public PixelPoint(double pitch, double yaw, double area, double pointTolerance){
+        this(pitch, yaw, area);
+        this.pointTolerance = pointTolerance; 
     }
 
     /**
@@ -51,7 +46,7 @@ public class PixelPoint {
         double sum = 0;
 
         //Number of valid data points
-        double validPoints = 4;
+        double validPoints = 3;
 
         //For each value in this.values, compare with the equivilant values in point.values and discard values outside tolerance
         for(int i = 0; i< values.length; i++){
@@ -71,6 +66,6 @@ public class PixelPoint {
             System.out.println(validPoints+" valid differences found.");
         }
         
-        return new double[]{sum, validPoints/4};
+        return new double[]{sum, validPoints/3};
     }
 }
