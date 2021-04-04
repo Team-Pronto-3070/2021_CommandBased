@@ -32,7 +32,7 @@ public class Vision {
                 double pitch = target.getPitch();
                 double area = target.getArea();
                 double skew = target.getSkew();
-
+                
                 PixelPoint info = new PixelPoint(pitch, yaw, skew, area);
 
                 targetInfo.add(info);
