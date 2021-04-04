@@ -407,9 +407,6 @@ public class XdriveTrajectoryCommand extends CommandBase {
 
     var desiredState = m_trajectory.sample(curTime);
 
-    SmartDashboard.putNumber("x setpoint", desiredState.poseMeters.getX());
-    SmartDashboard.putNumber("y setpoint", desiredState.poseMeters.getY());
-
     var targetChassisSpeeds = m_controller.calculate(m_pose.get(), desiredState, m_desiredRotation.apply(m_trajectory, curTime));
     var targetWheelSpeeds = m_kinematics.toWheelSpeeds(targetChassisSpeeds);
 

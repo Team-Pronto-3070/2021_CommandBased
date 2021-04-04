@@ -7,11 +7,11 @@ package frc.robot;
 import java.util.Map;
 import java.util.List;
 
-import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.geometry.Pose2d;
+import edu.wpi.first.wpilibj.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.trajectory.Trajectory;
@@ -48,7 +48,7 @@ public class RobotContainer {
   private final Drive_s m_drive = new Drive_s();
   private final Intake_s m_intake = new Intake_s();
   
-  private enum autoOptions {BARREL, BOUNCE, SLALOM, GALACTICSEARCH}
+  private enum autoOptions {BARREL, BOUNCE, SLALOM, GALACTICSEARCH, TEST1, TEST2}
 
   //define a sendable chooser to select the autonomous command
   private SendableChooser<autoOptions> autoChooser = new SendableChooser<autoOptions>();
@@ -64,6 +64,8 @@ public class RobotContainer {
     autoChooser.addOption("Auto Nav - Bounce path", autoOptions.BOUNCE);
     autoChooser.addOption("Auto Nav - Slalom path", autoOptions.SLALOM);
     autoChooser.addOption("Galactic Search", autoOptions.GALACTICSEARCH);
+    autoChooser.addOption("test 1", autoOptions.TEST1);
+    autoChooser.addOption("test 2", autoOptions.TEST2);
 
     //put the chooser on the dashboard
     SmartDashboard.putData(autoChooser);
@@ -79,8 +81,8 @@ public class RobotContainer {
     return TrajectoryGenerator.generateTrajectory(Constants.INITIAL_POSE,
                                                   List.of(),
                                                   m_drive.trajectoryFromJSON(path).getInitialPose(),
-                                                  new TrajectoryConfig(1 /*max velocity*/, .5 /*max acceleration*/)
-                                                    .addConstraint(new XdriveKinematicsConstraint(m_drive.getKinematics(), .5 /*max velocity*/)));
+                                                  new TrajectoryConfig(1 /*max velocity*/, 0.5 /*max acceleration*/)
+                                                    .addConstraint(new XdriveKinematicsConstraint(m_drive.getKinematics(), 1 /*max velocity*/)));
   }
 
   /**
@@ -150,7 +152,20 @@ public class RobotContainer {
                                                                                           Map.entry("aBlue", new XdriveTrajectoryCommand("paths/aBlue.wpilib.json", m_drive)),
                                                                                           Map.entry("bBlue", new XdriveTrajectoryCommand("paths/bBlue.wpilib.json", m_drive))),
                                                                                           vis::selectPath),
-                                                                      new RunCommand(() -> m_intake.set(Constants.IN_SPEED), m_intake)))),
+                                                                      new RunCommand(() -> m_intake.set(Constants.IN_SPEED), m_intake))),
+                              
+                              Map.entry(autoOptions.TEST1, new XdriveTrajectoryCommand(
+                                    TrajectoryGenerator.generateTrajectory(new Pose2d(0, 0, new Rotation2d(0)),
+                                                                           List.of(),
+                                                                           new Pose2d(1, 0, new Rotation2d(0)),
+                                              new TrajectoryConfig(1 /*max velocity*/, 0.5 /*max acceleration*/).addConstraint(new XdriveKinematicsConstraint(m_drive.getKinematics(), 1 /*max velocity*/))),
+                                  m_drive)),
+                              Map.entry(autoOptions.TEST2, new XdriveTrajectoryCommand(
+                                    TrajectoryGenerator.generateTrajectory(new Pose2d(0, 0, new Rotation2d(0)),
+                                                                           List.of(),
+                                                                           new Pose2d(-1, 0, new Rotation2d(0)),
+                                              new TrajectoryConfig(1 /*max velocity*/, 0.5 /*max acceleration*/).addConstraint(new XdriveKinematicsConstraint(m_drive.getKinematics(), 1 /*max velocity*/))),
+                                  m_drive))),
                             autoChooser::getSelected);
   }
 }
