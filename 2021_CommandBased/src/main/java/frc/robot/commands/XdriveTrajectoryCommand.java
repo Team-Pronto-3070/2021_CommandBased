@@ -189,8 +189,8 @@ public class XdriveTrajectoryCommand extends CommandBase {
         xController,
         yController,
         thetaController,
-        (traj, time) ->
-            traj.getStates().get(traj.getStates().size() - 1).poseMeters.getRotation(),
+//        (traj, time) -> traj.getStates().get(traj.getStates().size() - 1).poseMeters.getRotation(),
+        (traj, time) -> new Rotation2d(),
         maxWheelVelocityMetersPerSecond,
         frontLeftController,
         rearLeftController,
@@ -299,8 +299,8 @@ public class XdriveTrajectoryCommand extends CommandBase {
         xController,
         yController,
         thetaController,
-        (traj, time) ->
-            traj.getStates().get(traj.getStates().size() - 1).poseMeters.getRotation(),
+//        (traj, time) -> traj.getStates().get(traj.getStates().size() - 1).poseMeters.getRotation(),
+        (traj, time) -> new Rotation2d(),
         maxWheelVelocityMetersPerSecond,
         outputWheelSpeeds,
         requirements);
@@ -365,7 +365,8 @@ public class XdriveTrajectoryCommand extends CommandBase {
            Constants.X_PID_CONTROLLER,
            Constants.Y_PID_CONTROLLER,
            Constants.THETA_PID_CONTROLLER,
-           (traj, time) -> traj.getStates().get(traj.getStates().size() - 1).poseMeters.getRotation(),
+//           (traj, time) -> traj.getStates().get(traj.getStates().size() - 1).poseMeters.getRotation(),
+          (traj, time) -> new Rotation2d(),
            Constants.MAX_WHEEL_VELOCITY,
            Constants.FL_PID,
            Constants.BL_PID,
@@ -405,6 +406,9 @@ public class XdriveTrajectoryCommand extends CommandBase {
     double dt = curTime - m_prevTime;
 
     var desiredState = m_trajectory.sample(curTime);
+
+    SmartDashboard.putNumber("x setpoint", desiredState.poseMeters.getX());
+    SmartDashboard.putNumber("y setpoint", desiredState.poseMeters.getY());
 
     var targetChassisSpeeds = m_controller.calculate(m_pose.get(), desiredState, m_desiredRotation.apply(m_trajectory, curTime));
     var targetWheelSpeeds = m_kinematics.toWheelSpeeds(targetChassisSpeeds);
