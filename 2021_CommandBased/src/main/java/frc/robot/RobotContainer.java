@@ -110,7 +110,7 @@ public class RobotContainer {
     oi.getButton("setABlue").whenPressed(new InstantCommand(() -> vis.updateProfile("aBlue")));
     oi.getButton("setBRed").whenPressed(new InstantCommand(() -> vis.updateProfile("bRed")));
     oi.getButton("setBBlue").whenPressed(new InstantCommand(() -> vis.updateProfile("bBlue")));
-    oi.getButton("selectPath").whenPressed(new InstantCommand(() -> System.out.println(vis.selectPath())));
+    oi.getButton("selectPath").whenPressed(new InstantCommand(() -> System.out.println("\n\n"+vis.selectPath()+"\n\n")));
 
     // Referencing the added buttons when pressed
     oi.getButton("intake_in").whileHeld(new InstantCommand(() -> m_intake.set(Constants.IN_SPEED), m_intake), true);
@@ -141,6 +141,7 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
+    vis.readPaths();
     return new SelectCommand(Map.ofEntries(
                               Map.entry(autoOptions.BARREL, new XdriveTrajectoryCommand("paths/BarrelPath.wpilib.json", m_drive)),
                               Map.entry(autoOptions.BOUNCE, new XdriveTrajectoryCommand("paths/BouncePath.wpilib.json", m_drive)),

@@ -108,4 +108,7 @@ public final class Constants {
     public static final Vector<N3> ODOMETRY_STD_DEVS = VecBuilder.fill(0.1, 0.1, Units.degreesToRadians(1)).div(0.02);
 
     public static final I2C.Port IMU_PORT = I2C.Port.kOnboard;
+
+    //Vision file path
+    public static final String PATHS_FILE = "/home/lvuser/PATHS_FILE.txt";
 }
