@@ -115,4 +115,12 @@ public class PixelProfile {
 
         return new double[]{differenceSum, certaintyScore};
     }
+
+    public String toString(){
+        String toFile = "START PROFILE\n";
+        for(PixelPoint point : points){
+            toFile += point;
+        }
+        return toFile+"END PROFILE\n";
+    }
 }

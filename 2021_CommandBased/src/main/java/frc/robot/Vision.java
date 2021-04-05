@@ -1,6 +1,10 @@
 package frc.robot;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
 import java.util.ArrayList;
+import java.util.Scanner;
 
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPipelineResult;
@@ -16,6 +20,67 @@ public class Vision {
     public Vision(){
         if(camera == null){
             camera = new PhotonCamera("Microsoft_LifeCam_HD-3000");
+        }
+    }
+
+    private void writePaths(){
+        File file;
+        try{
+            file = new File(Constants.PATHS_FILE);
+            FileWriter fw = new FileWriter(file);
+
+            for(PixelProfile profile : new PixelProfile[]{ARED_PROFILE, ABLUE_PROFILE,BRED_PROFILE,BBLUE_PROFILE}){
+                fw.write(profile.toString());
+            }
+            fw.close();
+        }catch(Exception e){
+            System.out.println(e);
+        }
+        
+    }
+
+    public void readPaths(){
+        File file;
+
+        try{
+            file = new File(Constants.PATHS_FILE);
+            Scanner sc = new Scanner(file);
+
+            int profileNum = 0;
+            ArrayList<PixelPoint> listToSet = new ArrayList<>();
+            double tmpPITCH = 0;
+            double tmpYAW = 0;
+            double tmpAREA = 0;
+            while(sc.hasNextLine()){
+                String currentLine = sc.nextLine();
+                if(currentLine.equals("START PROFILE")){
+                    profileNum++;
+                }else if(currentLine.equals("END POINT")){
+                    listToSet.add(new PixelPoint(tmpPITCH, tmpYAW, tmpAREA));
+                }else if(currentLine.equals("END PROFILE")){
+                    if(profileNum == 1){
+                        ARED_PROFILE = new PixelProfile(listToSet, "aRed");
+                    }else if(profileNum == 2){
+                        ABLUE_PROFILE = new PixelProfile(listToSet, "aBlue");
+                    }else if(profileNum == 3){
+                        BRED_PROFILE = new PixelProfile(listToSet, "bRed");
+                    }else if(profileNum == 4){
+                        BBLUE_PROFILE = new PixelProfile(listToSet, "bBlue");
+                    }
+                    listToSet.clear();
+                }else{
+                    if(currentLine.contains("PITCH")){
+                        tmpPITCH = Double.parseDouble(currentLine.split(" ")[1]);
+                    }else if(currentLine.contains("YAW")){
+                        tmpYAW = Double.parseDouble(currentLine.split(" ")[1]);
+                    }else if (currentLine.contains("AREA")){
+                        tmpAREA = Double.parseDouble(currentLine.split(" ")[1]);
+                    }
+                }
+            }
+            sc.close();
+        }catch(FileNotFoundException e){
+            System.out.println(e);
         }
     }
 
@@ -41,12 +106,14 @@ public class Vision {
     }
 
     public String selectPath(){
-        if(ARED_PROFILE != null && ABLUE_PROFILE != null && BRED_PROFILE != null && BBLUE_PROFILE != null){
+        if(ARED_PROFILE != null || ABLUE_PROFILE != null || BRED_PROFILE != null || BBLUE_PROFILE != null){
+            writePaths();
             System.out.println("selecting path");
             Vision.takeSnapshot();
             return choosePath(targetInfo);
         }else{
-            System.out.println("One or more paths not set. Returning none.");
+            System.out.println("One or more paths not set. Trying backup file.");
+            readPaths();   
             return "none";
         }
     }

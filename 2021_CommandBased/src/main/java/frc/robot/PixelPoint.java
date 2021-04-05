@@ -68,4 +68,8 @@ public class PixelPoint {
         
         return new double[]{sum, validPoints/3};
     }
+
+    public String toString(){
+        return "START POINT\nPITCH "+pitch+"\nYAW "+yaw+"\n AREA"+area+"\nEND POINT\n";
+    }
 }
