@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.DemandType;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.InvertType;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
@@ -57,6 +58,11 @@ public class Drive_s extends SubsystemBase{
         talFR = new TalonFX(Constants.TAL_FR_PORT);
         talBR = new TalonFX(Constants.TAL_BR_PORT);
 
+        talFL.configFactoryDefault();
+        talFR.configFactoryDefault();
+        talBL.configFactoryDefault();
+        talBR.configFactoryDefault();
+
         talFL.setInverted(InvertType.InvertMotorOutput);
         talFR.setInverted(InvertType.InvertMotorOutput);
         talBL.setInverted(InvertType.InvertMotorOutput);
@@ -72,16 +78,50 @@ public class Drive_s extends SubsystemBase{
         talFR.configOpenloopRamp(Constants.RAMP_TIME);
         talBR.configOpenloopRamp(Constants.RAMP_TIME);
 
+        talFL.configClosedloopRamp(Constants.RAMP_TIME);
+        talFR.configClosedloopRamp(Constants.RAMP_TIME);
+        talBL.configClosedloopRamp(Constants.RAMP_TIME);
+        talBR.configClosedloopRamp(Constants.RAMP_TIME);
+
         talFL.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor);
 		talFR.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor);
 		talBL.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor);
         talBR.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor);
 
+        talFL.setSensorPhase(true);
+        talFR.setSensorPhase(true);
+        talBL.setSensorPhase(true);
+        talBR.setSensorPhase(true);
+
         talFL.configSelectedFeedbackCoefficient(1);
         talFR.configSelectedFeedbackCoefficient(1);
         talBL.configSelectedFeedbackCoefficient(1);
         talBR.configSelectedFeedbackCoefficient(1);
+
+        talFL.config_kP(0, Constants.FL_PID.getP() * Constants.TICKMS_TO_MSEC);
+//        talFL.config_kI(0, Constants.FL_PID.getI() * Constants.TICKMS_TO_MSEC);
+//        talFL.config_kD(0, Constants.FL_PID.getD() * Constants.TICKMS_TO_MSEC);
+//        talFL.config_kF(0, Constants.FL_FF.kv      * Constants.TICKMS_TO_MSEC);
+        talFL.config_kF(0, 1023.0 / 18000.0);
+        talFR.config_kF(0, 1023.0 / 18000.0);
+        talBL.config_kF(0, 1023.0 / 18000.0);
+        talBR.config_kF(0, 1023.0 / 18000.0);
         
+        talFR.config_kP(0, Constants.FR_PID.getP() * Constants.TICKMS_TO_MSEC);
+//        talFR.config_kI(0, Constants.FR_PID.getI() * Constants.TICKMS_TO_MSEC);
+//        talFR.config_kD(0, Constants.FR_PID.getD() * Constants.TICKMS_TO_MSEC);
+//        talFR.config_kF(0, Constants.FR_FF.kv      * Constants.TICKMS_TO_MSEC);
+
+        talBL.config_kP(0, Constants.BL_PID.getP() * Constants.TICKMS_TO_MSEC);
+//        talBL.config_kI(0, Constants.BL_PID.getI() * Constants.TICKMS_TO_MSEC);
+//        talBL.config_kD(0, Constants.BL_PID.getD() * Constants.TICKMS_TO_MSEC);
+//        talBL.config_kF(0, Constants.BL_FF.kv      * Constants.TICKMS_TO_MSEC);
+
+        talBR.config_kP(0, Constants.BR_PID.getP() * Constants.TICKMS_TO_MSEC);
+//        talBR.config_kI(0, Constants.BR_PID.getI() * Constants.TICKMS_TO_MSEC);
+//        talBR.config_kD(0, Constants.BR_PID.getD() * Constants.TICKMS_TO_MSEC);
+//        talBR.config_kF(0, Constants.BR_FF.kv      * Constants.TICKMS_TO_MSEC);
+
         imu = new AHRS(Constants.IMU_PORT);
 
         //initialize kinematics with relative locations of wheels
@@ -120,6 +160,22 @@ public class Drive_s extends SubsystemBase{
                                     values.frontRightMetersPerSecond,
                                     values.rearLeftMetersPerSecond,
                                     values.rearRightMetersPerSecond});
+    }
+
+    public void setWheelSpeeds(XdriveWheelSpeeds wheelSpeeds) {
+        SmartDashboard.putNumber("FL_SETPOINT", wheelSpeeds.frontLeftMetersPerSecond);
+        SmartDashboard.putNumber("FR_SETPOINT", wheelSpeeds.frontRightMetersPerSecond);
+        SmartDashboard.putNumber("BL_SETPOINT", wheelSpeeds.rearLeftMetersPerSecond);
+        SmartDashboard.putNumber("BR_SETPOINT", wheelSpeeds.rearRightMetersPerSecond);
+
+//        talFL.set(ControlMode.Velocity, wheelSpeeds.frontLeftMetersPerSecond  / Constants.TICKMS_TO_MSEC, DemandType.ArbitraryFeedForward, (wheelSpeeds.frontLeftMetersPerSecond  == 0 ? 0 : Constants.FL_FF.ks / Constants.TICKMS_TO_MSEC) * (wheelSpeeds.frontLeftMetersPerSecond  > 0 ? 1 : -1));
+//        talFR.set(ControlMode.Velocity, wheelSpeeds.frontRightMetersPerSecond / Constants.TICKMS_TO_MSEC, DemandType.ArbitraryFeedForward, (wheelSpeeds.frontRightMetersPerSecond == 0 ? 0 : Constants.FR_FF.ks / Constants.TICKMS_TO_MSEC) * (wheelSpeeds.frontRightMetersPerSecond > 0 ? 1 : -1));
+//        talBL.set(ControlMode.Velocity, wheelSpeeds.rearLeftMetersPerSecond   / Constants.TICKMS_TO_MSEC, DemandType.ArbitraryFeedForward, (wheelSpeeds.rearLeftMetersPerSecond   == 0 ? 0 : Constants.BL_FF.ks / Constants.TICKMS_TO_MSEC) * (wheelSpeeds.rearLeftMetersPerSecond   > 0 ? 1 : -1));
+//        talBR.set(ControlMode.Velocity, wheelSpeeds.rearRightMetersPerSecond  / Constants.TICKMS_TO_MSEC, DemandType.ArbitraryFeedForward, (wheelSpeeds.rearRightMetersPerSecond  == 0 ? 0 : Constants.BR_FF.ks / Constants.TICKMS_TO_MSEC) * (wheelSpeeds.rearRightMetersPerSecond  > 0 ? 1 : -1));
+        talFL.set(ControlMode.Velocity, wheelSpeeds.frontLeftMetersPerSecond  / Constants.TICKMS_TO_MSEC, DemandType.ArbitraryFeedForward, 0);
+        talFR.set(ControlMode.Velocity, wheelSpeeds.frontRightMetersPerSecond / Constants.TICKMS_TO_MSEC, DemandType.ArbitraryFeedForward, 0);
+        talBL.set(ControlMode.Velocity, wheelSpeeds.rearLeftMetersPerSecond   / Constants.TICKMS_TO_MSEC, DemandType.ArbitraryFeedForward, 0);
+        talBR.set(ControlMode.Velocity, wheelSpeeds.rearRightMetersPerSecond  / Constants.TICKMS_TO_MSEC, DemandType.ArbitraryFeedForward, 0);
     }
 
     public Pose2d getPose() {

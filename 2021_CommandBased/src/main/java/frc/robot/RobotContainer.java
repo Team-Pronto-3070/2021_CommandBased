@@ -7,6 +7,7 @@ package frc.robot;
 import java.util.Map;
 import java.util.List;
 
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.XboxController;
@@ -58,6 +59,8 @@ public class RobotContainer {
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
+    NetworkTableInstance.getDefault().setUpdateRate(0.01);
+
     //add options to the chooser
     autoChooser.setDefaultOption("None", null);
     autoChooser.addOption("Auto Nav - Barrel path", autoOptions.BARREL);

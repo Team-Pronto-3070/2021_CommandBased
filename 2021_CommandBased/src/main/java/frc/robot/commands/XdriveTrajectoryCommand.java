@@ -358,7 +358,7 @@ public class XdriveTrajectoryCommand extends CommandBase {
   public XdriveTrajectoryCommand(
     Trajectory trajectory,
     Drive_s drive) {
-      this(trajectory,
+/*      this(trajectory,
            drive::getPose,
            Constants.FEEDFORWARD,
            drive.getKinematics(),
@@ -374,7 +374,17 @@ public class XdriveTrajectoryCommand extends CommandBase {
            Constants.BR_PID,
            drive::getWheelSpeeds,
            drive::setIndividual,
-           drive);
+           drive);*/
+        this(trajectory,
+             drive::getPose,
+             drive.getKinematics(),
+             Constants.X_PID_CONTROLLER,
+             Constants.Y_PID_CONTROLLER,
+             Constants.THETA_PID_CONTROLLER,
+             (traj, time) -> new Rotation2d(),
+             Constants.MAX_WHEEL_VELOCITY,
+             drive::setWheelSpeeds,
+             drive);
   }
 
   public XdriveTrajectoryCommand(String path, Drive_s drive) {

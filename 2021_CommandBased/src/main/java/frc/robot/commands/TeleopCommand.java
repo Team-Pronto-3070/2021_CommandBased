@@ -40,7 +40,8 @@ public class TeleopCommand extends CommandBase{
     SmartDashboard.putNumber("teleop_y", _oi.getY());
     SmartDashboard.putNumber("teleop_theta", _oi.getTheta());
 
-    _drive.setIndividual(
+//    _drive.setIndividual(
+    _drive.setWheelSpeeds(
 //    closedLoop(
                     _drive.getKinematics().toWheelSpeeds(ChassisSpeeds.fromFieldRelativeSpeeds(
                                   (Math.abs(_oi.getX()) < Constants.JOY_STICK_VX_DEADZONE) ? 0 : _oi.getX() * Constants.VX_COEFFICENT,

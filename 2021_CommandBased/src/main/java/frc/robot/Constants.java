@@ -55,10 +55,10 @@ public final class Constants {
     public static final PIDController Y_PID_CONTROLLER = new PIDController(0, 0, 0);
     public static final ProfiledPIDController THETA_PID_CONTROLLER = new ProfiledPIDController(0, 0, 0, new TrapezoidProfile.Constraints(MAX_ANGULAR_VELOCITY, MAX_ANGULAR_ACCELERATION));
 
-    public static final PIDController FL_PID = new PIDController(0.6, 0, 0);
-    public static final PIDController FR_PID = new PIDController(0.6, 0, 0);
-    public static final PIDController BL_PID = new PIDController(0.6, 0, 0);
-    public static final PIDController BR_PID = new PIDController(0.6, 0, 0);
+    public static final PIDController FL_PID = new PIDController(0.8, 0, 0);
+    public static final PIDController FR_PID = new PIDController(0.8, 0, 0);
+    public static final PIDController BL_PID = new PIDController(0.8, 0, 0);
+    public static final PIDController BR_PID = new PIDController(0.8, 0, 0);
 
     public static final SimpleMotorFeedforward FEEDFORWARD = new SimpleMotorFeedforward(0.845/12.0, 0.25044035865390880768, 0.171/12.0);
     
@@ -100,7 +100,12 @@ public final class Constants {
     public static final double OMEGA_COEFFICENT = 1;
 
     //Ratio of Ticks per 100 milliseconds (output of getSelectedSensorVelocity) to meters per second
+    private static final double WHEEL_GEAR_RATIO = 12.75;
+    private static final double TICKS_PER_REVOLUTION = 2048.0;
+    private static final double WHEEL_CIRCUMFRENCE = 6.0 * 3.14159 * 0.0254;
+
     public static final double TICKMS_TO_MSEC = 0.0001833558212343308;
+//    public static final double TICKMS_TO_MSEC = 10.0 / TICKS_PER_REVOLUTION / WHEEL_GEAR_RATIO * WHEEL_CIRCUMFRENCE;
 
     //pose estimator standard deviations
     public static final Vector<N3> STATE_STD_DEVS = VecBuilder.fill(0.25, 0.25, Units.degreesToRadians(30));
