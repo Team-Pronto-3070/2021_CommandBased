@@ -102,10 +102,10 @@ public class Drive_s extends SubsystemBase{
 //        talFL.config_kI(0, Constants.FL_PID.getI() * Constants.TICKMS_TO_MSEC);
 //        talFL.config_kD(0, Constants.FL_PID.getD() * Constants.TICKMS_TO_MSEC);
 //        talFL.config_kF(0, Constants.FL_FF.kv      * Constants.TICKMS_TO_MSEC);
-        talFL.config_kF(0, 1023.0 / 18000.0);
-        talFR.config_kF(0, 1023.0 / 18000.0);
-        talBL.config_kF(0, 1023.0 / 18000.0);
-        talBR.config_kF(0, 1023.0 / 18000.0);
+        talFL.config_kF(0, 1023.0 * (1.0 - 0.057) / 18000.0);
+        talFR.config_kF(0, 1023.0 * (1.0 - 0.057) / 18000.0);
+        talBL.config_kF(0, 1023.0 * (1.0 - 0.057) / 18000.0);
+        talBR.config_kF(0, 1023.0 * (1.0 - 0.057) / 18000.0);
         
         talFR.config_kP(0, Constants.FR_PID.getP() * Constants.TICKMS_TO_MSEC);
 //        talFR.config_kI(0, Constants.FR_PID.getI() * Constants.TICKMS_TO_MSEC);
@@ -168,14 +168,14 @@ public class Drive_s extends SubsystemBase{
         SmartDashboard.putNumber("BL_SETPOINT", wheelSpeeds.rearLeftMetersPerSecond);
         SmartDashboard.putNumber("BR_SETPOINT", wheelSpeeds.rearRightMetersPerSecond);
 
-//        talFL.set(ControlMode.Velocity, wheelSpeeds.frontLeftMetersPerSecond  / Constants.TICKMS_TO_MSEC, DemandType.ArbitraryFeedForward, (wheelSpeeds.frontLeftMetersPerSecond  == 0 ? 0 : Constants.FL_FF.ks / Constants.TICKMS_TO_MSEC) * (wheelSpeeds.frontLeftMetersPerSecond  > 0 ? 1 : -1));
-//        talFR.set(ControlMode.Velocity, wheelSpeeds.frontRightMetersPerSecond / Constants.TICKMS_TO_MSEC, DemandType.ArbitraryFeedForward, (wheelSpeeds.frontRightMetersPerSecond == 0 ? 0 : Constants.FR_FF.ks / Constants.TICKMS_TO_MSEC) * (wheelSpeeds.frontRightMetersPerSecond > 0 ? 1 : -1));
-//        talBL.set(ControlMode.Velocity, wheelSpeeds.rearLeftMetersPerSecond   / Constants.TICKMS_TO_MSEC, DemandType.ArbitraryFeedForward, (wheelSpeeds.rearLeftMetersPerSecond   == 0 ? 0 : Constants.BL_FF.ks / Constants.TICKMS_TO_MSEC) * (wheelSpeeds.rearLeftMetersPerSecond   > 0 ? 1 : -1));
-//        talBR.set(ControlMode.Velocity, wheelSpeeds.rearRightMetersPerSecond  / Constants.TICKMS_TO_MSEC, DemandType.ArbitraryFeedForward, (wheelSpeeds.rearRightMetersPerSecond  == 0 ? 0 : Constants.BR_FF.ks / Constants.TICKMS_TO_MSEC) * (wheelSpeeds.rearRightMetersPerSecond  > 0 ? 1 : -1));
-        talFL.set(ControlMode.Velocity, wheelSpeeds.frontLeftMetersPerSecond  / Constants.TICKMS_TO_MSEC, DemandType.ArbitraryFeedForward, 0);
-        talFR.set(ControlMode.Velocity, wheelSpeeds.frontRightMetersPerSecond / Constants.TICKMS_TO_MSEC, DemandType.ArbitraryFeedForward, 0);
-        talBL.set(ControlMode.Velocity, wheelSpeeds.rearLeftMetersPerSecond   / Constants.TICKMS_TO_MSEC, DemandType.ArbitraryFeedForward, 0);
-        talBR.set(ControlMode.Velocity, wheelSpeeds.rearRightMetersPerSecond  / Constants.TICKMS_TO_MSEC, DemandType.ArbitraryFeedForward, 0);
+        talFL.set(ControlMode.Velocity, wheelSpeeds.frontLeftMetersPerSecond  / Constants.TICKMS_TO_MSEC, DemandType.ArbitraryFeedForward, (wheelSpeeds.frontLeftMetersPerSecond  == 0 ? 0 : Constants.FL_FF.ks) * (wheelSpeeds.frontLeftMetersPerSecond  > 0 ? 1 : -1));
+        talFR.set(ControlMode.Velocity, wheelSpeeds.frontRightMetersPerSecond / Constants.TICKMS_TO_MSEC, DemandType.ArbitraryFeedForward, (wheelSpeeds.frontRightMetersPerSecond == 0 ? 0 : Constants.FR_FF.ks) * (wheelSpeeds.frontRightMetersPerSecond > 0 ? 1 : -1));
+        talBL.set(ControlMode.Velocity, wheelSpeeds.rearLeftMetersPerSecond   / Constants.TICKMS_TO_MSEC, DemandType.ArbitraryFeedForward, (wheelSpeeds.rearLeftMetersPerSecond   == 0 ? 0 : Constants.BL_FF.ks) * (wheelSpeeds.rearLeftMetersPerSecond   > 0 ? 1 : -1));
+        talBR.set(ControlMode.Velocity, wheelSpeeds.rearRightMetersPerSecond  / Constants.TICKMS_TO_MSEC, DemandType.ArbitraryFeedForward, (wheelSpeeds.rearRightMetersPerSecond  == 0 ? 0 : Constants.BR_FF.ks) * (wheelSpeeds.rearRightMetersPerSecond  > 0 ? 1 : -1));
+//        talFL.set(ControlMode.Velocity, wheelSpeeds.frontLeftMetersPerSecond  / Constants.TICKMS_TO_MSEC, DemandType.ArbitraryFeedForward, 0);
+//        talFR.set(ControlMode.Velocity, wheelSpeeds.frontRightMetersPerSecond / Constants.TICKMS_TO_MSEC, DemandType.ArbitraryFeedForward, 0);
+//        talBL.set(ControlMode.Velocity, wheelSpeeds.rearLeftMetersPerSecond   / Constants.TICKMS_TO_MSEC, DemandType.ArbitraryFeedForward, 0);
+//        talBR.set(ControlMode.Velocity, wheelSpeeds.rearRightMetersPerSecond  / Constants.TICKMS_TO_MSEC, DemandType.ArbitraryFeedForward, 0);
     }
 
     public Pose2d getPose() {

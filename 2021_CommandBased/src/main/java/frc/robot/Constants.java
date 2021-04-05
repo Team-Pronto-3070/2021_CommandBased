@@ -51,14 +51,14 @@ public final class Constants {
     public static final double MAX_ANGULAR_ACCELERATION = 1; //in radians/second^2
 
     //PID Constants
-    public static final PIDController X_PID_CONTROLLER = new PIDController(0, 0, 0);
-    public static final PIDController Y_PID_CONTROLLER = new PIDController(0, 0, 0);
-    public static final ProfiledPIDController THETA_PID_CONTROLLER = new ProfiledPIDController(0, 0, 0, new TrapezoidProfile.Constraints(MAX_ANGULAR_VELOCITY, MAX_ANGULAR_ACCELERATION));
+    public static final PIDController X_PID_CONTROLLER = new PIDController(0.5, 0, 0);
+    public static final PIDController Y_PID_CONTROLLER = new PIDController(0.5, 0, 0);
+    public static final ProfiledPIDController THETA_PID_CONTROLLER = new ProfiledPIDController(0.1, 0, 0, new TrapezoidProfile.Constraints(MAX_ANGULAR_VELOCITY, MAX_ANGULAR_ACCELERATION));
 
-    public static final PIDController FL_PID = new PIDController(0.8, 0, 0);
-    public static final PIDController FR_PID = new PIDController(0.8, 0, 0);
-    public static final PIDController BL_PID = new PIDController(0.8, 0, 0);
-    public static final PIDController BR_PID = new PIDController(0.8, 0, 0);
+    public static final PIDController FL_PID = new PIDController(750, 0, 0);
+    public static final PIDController FR_PID = new PIDController(750, 0, 0);
+    public static final PIDController BL_PID = new PIDController(750, 0, 0);
+    public static final PIDController BR_PID = new PIDController(750, 0, 0);
 
     public static final SimpleMotorFeedforward FEEDFORWARD = new SimpleMotorFeedforward(0.845/12.0, 0.25044035865390880768, 0.171/12.0);
     
