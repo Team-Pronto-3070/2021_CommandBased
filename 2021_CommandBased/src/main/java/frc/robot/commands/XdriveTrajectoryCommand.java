@@ -323,21 +323,15 @@ public class XdriveTrajectoryCommand extends CommandBase {
       BiFunction<Trajectory, Double, Rotation2d> desiredRotation,
       Drive_s drive) {
         this(trajectory,
-        drive::getPose,
-        Constants.FEEDFORWARD,
-        drive.getKinematics(),
-        Constants.X_PID_CONTROLLER,
-        Constants.Y_PID_CONTROLLER,
-        Constants.THETA_PID_CONTROLLER,
-        desiredRotation,
-        Constants.MAX_WHEEL_VELOCITY,
-        Constants.FL_PID,
-        Constants.BL_PID,
-        Constants.FR_PID,
-        Constants.BR_PID,
-        drive::getWheelSpeeds,
-        drive::setIndividual,
-        drive);
+             drive::getPose,
+             drive.getKinematics(),
+             Constants.X_PID_CONTROLLER,
+             Constants.Y_PID_CONTROLLER,
+             Constants.THETA_PID_CONTROLLER,
+             desiredRotation,
+             Constants.MAX_WHEEL_VELOCITY,
+             drive::setWheelSpeeds,
+             drive);
       }
 
   /**
@@ -358,23 +352,6 @@ public class XdriveTrajectoryCommand extends CommandBase {
   public XdriveTrajectoryCommand(
     Trajectory trajectory,
     Drive_s drive) {
-/*      this(trajectory,
-           drive::getPose,
-           Constants.FEEDFORWARD,
-           drive.getKinematics(),
-           Constants.X_PID_CONTROLLER,
-           Constants.Y_PID_CONTROLLER,
-           Constants.THETA_PID_CONTROLLER,
-//           (traj, time) -> traj.getStates().get(traj.getStates().size() - 1).poseMeters.getRotation(),
-          (traj, time) -> new Rotation2d(),
-           Constants.MAX_WHEEL_VELOCITY,
-           Constants.FL_PID,
-           Constants.BL_PID,
-           Constants.FR_PID,
-           Constants.BR_PID,
-           drive::getWheelSpeeds,
-           drive::setIndividual,
-           drive);*/
         this(trajectory,
              drive::getPose,
              drive.getKinematics(),
