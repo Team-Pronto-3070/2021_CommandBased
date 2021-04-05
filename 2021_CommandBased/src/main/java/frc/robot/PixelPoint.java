@@ -70,6 +70,6 @@ public class PixelPoint {
     }
 
     public String toString(){
-        return "START POINT\nPITCH "+pitch+"\nYAW "+yaw+"\n AREA"+area+"\nEND POINT\n";
+        return "START POINT\nPITCH "+pitch+"\nYAW "+yaw+"\nAREA "+area+"\nEND POINT\n";
     }
 }
