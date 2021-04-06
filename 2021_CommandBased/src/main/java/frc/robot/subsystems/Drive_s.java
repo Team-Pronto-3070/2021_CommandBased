@@ -183,9 +183,9 @@ public class Drive_s extends SubsystemBase{
     }
 
     public Pose2d getPose() {
-        return odometry.getPoseMeters();
+//        return odometry.getPoseMeters();
 //        return poseEstimator.getEstimatedPosition();
-//        return odometry.getPoseWith2Encoders(imu.getRotation2d());
+        return new Pose2d(odometry.getPoseMeters().getTranslation(), imu.getRotation2d().minus(gyroOffset));
     }
 
     public void resetOdometry(Pose2d pose) {
@@ -234,7 +234,7 @@ public class Drive_s extends SubsystemBase{
     }
 
     public Rotation2d getTeleopRotation() {
-//        return getPose().getRotation().plus(teleopRotationOffset);
+//        return getPose().getRotation();
         return imu.getRotation2d().minus(gyroOffset);
     }
 
