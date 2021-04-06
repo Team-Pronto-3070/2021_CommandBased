@@ -189,8 +189,8 @@ public class XdriveTrajectoryCommand extends CommandBase {
         xController,
         yController,
         thetaController,
-        (traj, time) ->
-            traj.getStates().get(traj.getStates().size() - 1).poseMeters.getRotation(),
+//        (traj, time) -> traj.getStates().get(traj.getStates().size() - 1).poseMeters.getRotation(),
+        (traj, time) -> new Rotation2d(),
         maxWheelVelocityMetersPerSecond,
         frontLeftController,
         rearLeftController,
@@ -299,8 +299,8 @@ public class XdriveTrajectoryCommand extends CommandBase {
         xController,
         yController,
         thetaController,
-        (traj, time) ->
-            traj.getStates().get(traj.getStates().size() - 1).poseMeters.getRotation(),
+//        (traj, time) -> traj.getStates().get(traj.getStates().size() - 1).poseMeters.getRotation(),
+        (traj, time) -> new Rotation2d(),
         maxWheelVelocityMetersPerSecond,
         outputWheelSpeeds,
         requirements);
@@ -365,7 +365,8 @@ public class XdriveTrajectoryCommand extends CommandBase {
            Constants.X_PID_CONTROLLER,
            Constants.Y_PID_CONTROLLER,
            Constants.THETA_PID_CONTROLLER,
-           (traj, time) -> traj.getStates().get(traj.getStates().size() - 1).poseMeters.getRotation(),
+//           (traj, time) -> traj.getStates().get(traj.getStates().size() - 1).poseMeters.getRotation(),
+          (traj, time) -> new Rotation2d(),
            Constants.MAX_WHEEL_VELOCITY,
            Constants.FL_PID,
            Constants.BL_PID,

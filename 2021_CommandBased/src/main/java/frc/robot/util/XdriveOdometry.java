@@ -4,15 +4,17 @@
 
 package frc.robot.util;
 
-import org.ejml.simple.SimpleMatrix;
-
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.geometry.Pose2d;
-import edu.wpi.first.wpilibj.geometry.Rotation2d;
-import edu.wpi.first.wpilibj.geometry.Translation2d;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.geometry.Twist2d;
 import edu.wpi.first.wpilibj.util.Units;
-
+import edu.wpi.first.wpiutil.math.MatBuilder;
+import edu.wpi.first.wpiutil.math.Matrix;
+import edu.wpi.first.wpiutil.math.VecBuilder;
+import edu.wpi.first.wpiutil.math.Vector;
+import edu.wpi.first.wpiutil.math.Nat;
+import edu.wpi.first.wpiutil.math.numbers.N3;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants;
 
 /**
@@ -24,14 +26,15 @@ import frc.robot.Constants;
  */
 public class XdriveOdometry {
 
-  private Pose2d initialPose;
+  private Pose2d pose;
 
   private Encoder leftEncoder;
   private Encoder rightEncoder;
   private Encoder backEncoder;
 
-  private final SimpleMatrix forwardKinematics;
-  private final SimpleMatrix inverseKinematics;
+  private final Matrix<N3, N3> inverseKinematics;
+
+  private Vector<N3> prevEncoders = new Vector<>(Nat.N3());
 
   /**
    * Constructs a XdriveOdometry object.
@@ -39,13 +42,16 @@ public class XdriveOdometry {
    * @param initialPoseMeters The starting position of the robot on the field.
    */
   public XdriveOdometry(Pose2d initialPoseMeters) {
-    initialPose = initialPoseMeters;
+    pose = initialPoseMeters;
+
     leftEncoder = new Encoder(Constants.ODOMETRY_WHEEL_LEFT_PORT[0],
                               Constants.ODOMETRY_WHEEL_LEFT_PORT[1],
                               Constants.ODOMETRY_WHEEL_LEFT_REVERSED);
+    
     rightEncoder = new Encoder(Constants.ODOMETRY_WHEEL_RIGHT_PORT[0],
                                Constants.ODOMETRY_WHEEL_RIGHT_PORT[1],
                                Constants.ODOMETRY_WHEEL_RIGHT_REVERSED);
+    
     backEncoder = new Encoder(Constants.ODOMETRY_WHEEL_BACK_PORT[0],
                               Constants.ODOMETRY_WHEEL_BACK_PORT[1],
                               Constants.ODOMETRY_WHEEL_BACK_REVERSED);
@@ -54,10 +60,9 @@ public class XdriveOdometry {
     rightEncoder.setDistancePerPulse(Constants.ODOMETRY_WHEEL_METERS_PER_PULSE_R);
     backEncoder.setDistancePerPulse(Constants.ODOMETRY_WHEEL_METERS_PER_PULSE_B);
 
-    forwardKinematics = new SimpleMatrix(new double[][] {{ 1, 0, -1 * Units.inchesToMeters(Constants.ODOMETRY_WHEEL_SIDE_INCHES)},
-                                                         { 1, 0,      Units.inchesToMeters(Constants.ODOMETRY_WHEEL_SIDE_INCHES)},
-                                                         { 0, 1, -1 * Units.inchesToMeters(Constants.ODOMETRY_WHEEL_BACK_INCHES)}});
-    inverseKinematics = forwardKinematics.invert();
+    inverseKinematics = new MatBuilder<>(Nat.N3(), Nat.N3()).fill(1, 0, -1 * Units.inchesToMeters(Constants.ODOMETRY_WHEEL_SIDE_INCHES),
+                                                                  1, 0,      Units.inchesToMeters(Constants.ODOMETRY_WHEEL_SIDE_INCHES),
+                                                                  0, 1, -1 * Units.inchesToMeters(Constants.ODOMETRY_WHEEL_BACK_INCHES)).inv();
   }
 
   /**
@@ -73,10 +78,7 @@ public class XdriveOdometry {
    * @param poseMeters The position on the field that your robot is at.
    */
   public void resetPosition(Pose2d poseMeters) {
-    initialPose = poseMeters;
-    leftEncoder.reset();
-    rightEncoder.reset();
-    backEncoder.reset();
+    pose = poseMeters;
   }
 
   /**
@@ -85,37 +87,18 @@ public class XdriveOdometry {
    * @return The pose of the robot (x and y are in meters).
    */
   public Pose2d getPoseMeters() {
-    var poseVector = inverseKinematics.mult(new SimpleMatrix(new double[][] {{leftEncoder.getDistance() },
-                                                                             {rightEncoder.getDistance()},
-                                                                             {backEncoder.getDistance() }}));
-    return new Pose2d(new Translation2d(poseVector.get(0,0), poseVector.get(1,0))
-                            .rotateBy(new Rotation2d(poseVector.get(2,0))),
-                      new Rotation2d(poseVector.get(2,0)))
-                .relativeTo(initialPose);
+    return pose;
   }
 
-  /*
-  public Pose2d getPoseWith2Encoders(Rotation2d gyroAngle) {
-    rightDist = rightEncoder.getDistance();
-    backDist = backEncoder.getDistance();
-
-    SmartDashboard.putNumber("right_encoder", rightDist);
-    SmartDashboard.putNumber("back_encoder", backDist);
- 
-    x = rightDist - (gyroAngle.getRadians() * Units.inchesToMeters(Constants.ODOMETRY_WHEEL_SIDE_INCHES));
-    y = backDist + (Units.inchesToMeters(Constants.ODOMETRY_WHEEL_BACK_INCHES) * gyroAngle.getRadians());
-    
-    return new Pose2d(x, y, gyroAngle).plus(new Transform2d(new Pose2d(), initialPose));
-  }
-  */
-
-  /**
-   * 
-   */
   public Pose2d update() {
     SmartDashboard.putNumber("left_encoder", leftEncoder.getDistance());
     SmartDashboard.putNumber("right_encoder", rightEncoder.getDistance());
     SmartDashboard.putNumber("back_encoder", backEncoder.getDistance());
-    return getPoseMeters();
+
+    var encoders = VecBuilder.fill(leftEncoder.getDistance(), rightEncoder.getDistance(), backEncoder.getDistance());
+    var dPose = inverseKinematics.times(encoders.minus(prevEncoders));
+    prevEncoders = encoders;
+    pose = pose.exp(new Twist2d(dPose.get(0,0), dPose.get(1,0), dPose.get(2,0)));
+    return pose;
   }
 }
