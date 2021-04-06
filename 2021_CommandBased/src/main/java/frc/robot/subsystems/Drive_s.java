@@ -5,6 +5,7 @@ import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.geometry.Pose2d;
 import edu.wpi.first.wpilibj.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.geometry.Translation2d;
+import edu.wpi.first.wpilibj.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.trajectory.Trajectory;
@@ -51,6 +52,8 @@ public class Drive_s extends SubsystemBase{
     private Rotation2d teleopRotationOffset = new Rotation2d();
 
     private Field2d field = new Field2d();
+
+    private Rotation2d gyroOffset = new Rotation2d();
     
     public Drive_s(){
         talFL = new TalonFX(Constants.TAL_FL_PORT);
@@ -170,6 +173,13 @@ public class Drive_s extends SubsystemBase{
         talBR.set(ControlMode.Velocity, wheelSpeeds.rearRightMetersPerSecond  / Constants.TICKMS_TO_MSEC, DemandType.ArbitraryFeedForward, (wheelSpeeds.rearRightMetersPerSecond  == 0 ? 0 : Constants.BR_FF.ks) * (wheelSpeeds.rearRightMetersPerSecond  > 0 ? 1 : -1));
     }
 
+    public void setChassisSpeeds(ChassisSpeeds targetSpeeds) {
+        setWheelSpeeds(kinematics.toWheelSpeeds(targetSpeeds).normalize(Constants.MAX_WHEEL_VELOCITY));
+
+        var currentSpeeds = kinematics.toChassisSpeeds(getWheelSpeeds());
+        setWheelSpeeds(kinematics.toWheelSpeeds(new ChassisSpeeds(Constants.VX_PID.calculate(currentSpeeds.vxMetersPerSecond, targetSpeeds.vxMetersPerSecond), Constants.VY_PID.calculate(currentSpeeds.vyMetersPerSecond, targetSpeeds.vyMetersPerSecond), omegaRadiansPerSecond)).normalize(Constants.MAX_WHEEL_VELOCITY));
+    }
+
     public Pose2d getPose() {
         return odometry.getPoseMeters();
 //        return poseEstimator.getEstimatedPosition();
@@ -179,6 +189,7 @@ public class Drive_s extends SubsystemBase{
     public void resetOdometry(Pose2d pose) {
         odometry.resetPosition(pose);
         poseEstimator.resetPosition(pose, imu.getRotation2d());
+        gyroOffset = imu.getRotation2d();
     }
 
     public XdriveKinematics getKinematics() {
@@ -221,11 +232,8 @@ public class Drive_s extends SubsystemBase{
     }
 
     public Rotation2d getTeleopRotation() {
-        return getPose().getRotation().plus(teleopRotationOffset);
-    }
-
-    public void setTeleopRotationOffset(Rotation2d offset) {
-        teleopRotationOffset = offset;
+//        return getPose().getRotation().plus(teleopRotationOffset);
+        return imu.getRotation2d().minus(gyroOffset);
     }
 
     @Override

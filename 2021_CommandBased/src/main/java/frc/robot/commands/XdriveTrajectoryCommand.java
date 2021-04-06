@@ -61,6 +61,8 @@ public class XdriveTrajectoryCommand extends CommandBase {
   private XdriveWheelSpeeds m_prevSpeeds;
   private double m_prevTime;
 
+  private Drive_s m_drive;
+
   /**
    * Constructs a new XdriveControllerCommand that when executed will follow the provided
    * trajectory. PID control and feedforward are handled internally. Outputs are scaled from -12 to
@@ -332,6 +334,7 @@ public class XdriveTrajectoryCommand extends CommandBase {
              Constants.MAX_WHEEL_VELOCITY,
              drive::setWheelSpeeds,
              drive);
+        m_drive = drive;
       }
 
   /**
@@ -362,6 +365,7 @@ public class XdriveTrajectoryCommand extends CommandBase {
              Constants.MAX_WHEEL_VELOCITY,
              drive::setWheelSpeeds,
              drive);
+        m_drive = drive;
   }
 
   public XdriveTrajectoryCommand(String path, Drive_s drive) {
@@ -460,12 +464,13 @@ public class XdriveTrajectoryCommand extends CommandBase {
               frontLeftOutput, frontRightOutput, rearLeftOutput, rearRightOutput));
 
     } else {
-      m_outputWheelSpeeds.accept(
-          new XdriveWheelSpeeds(
-              frontLeftSpeedSetpoint,
-              frontRightSpeedSetpoint,
-              rearLeftSpeedSetpoint,
-              rearRightSpeedSetpoint));
+//      m_outputWheelSpeeds.accept(
+//          new XdriveWheelSpeeds(
+//              frontLeftSpeedSetpoint,
+//              frontRightSpeedSetpoint,
+//              rearLeftSpeedSetpoint,
+//              rearRightSpeedSetpoint));
+        m_drive.setChassisSpeeds(targetChassisSpeeds);
     }
 
     m_prevTime = curTime;
