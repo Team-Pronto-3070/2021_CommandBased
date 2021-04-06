@@ -27,11 +27,12 @@ public class Vision {
 
         if(result.hasTargets()){
 
-            for (PhotonTrackedTarget target: result.getTargets()){
+            for (PhotonTrackedTarget target: result.getTargets(){
                 double yaw = target.getYaw();
                 double pitch = target.getPitch();
                 double area = target.getArea();
                 double skew = target.getSkew();
+                
 
                 PixelPoint info = new PixelPoint(pitch, yaw, skew, area);
 
