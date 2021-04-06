@@ -50,7 +50,8 @@ public class TeleopCommand extends CommandBase{
                                   (Math.abs(_oi.getY()) < Constants.JOY_STICK_VY_DEADZONE) ? 0 : _oi.getY() * Constants.VY_COEFFICENT,
                                   (Math.abs(_oi.getTheta()) < Constants.JOY_STICK_OMEGA_DEADZONE) ? 0 : _oi.getTheta() * Constants.OMEGA_COEFFICENT,
                                   _drive.getTeleopRotation()))
-//                              .normalize(Constants.MAX_WHEEL_VELOCITY));
+//                              .normalize(Constants.MAX_WHEEL_VELOCITY))
+                                                                ;
   }
 
   private void closedLoop(XdriveWheelSpeeds targetWheelSpeeds) {

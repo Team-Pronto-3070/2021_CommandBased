@@ -49,8 +49,6 @@ public class Drive_s extends SubsystemBase{
 
     private AHRS imu;
 
-    private Rotation2d teleopRotationOffset = new Rotation2d();
-
     private Field2d field = new Field2d();
 
     private Rotation2d gyroOffset = new Rotation2d();
@@ -174,10 +172,14 @@ public class Drive_s extends SubsystemBase{
     }
 
     public void setChassisSpeeds(ChassisSpeeds targetSpeeds) {
-        setWheelSpeeds(kinematics.toWheelSpeeds(targetSpeeds).normalize(Constants.MAX_WHEEL_VELOCITY));
+//        setWheelSpeeds(kinematics.toWheelSpeeds(targetSpeeds).normalize(Constants.MAX_WHEEL_VELOCITY));
 
         var currentSpeeds = kinematics.toChassisSpeeds(getWheelSpeeds());
-        setWheelSpeeds(kinematics.toWheelSpeeds(new ChassisSpeeds(Constants.VX_PID.calculate(currentSpeeds.vxMetersPerSecond, targetSpeeds.vxMetersPerSecond), Constants.VY_PID.calculate(currentSpeeds.vyMetersPerSecond, targetSpeeds.vyMetersPerSecond), omegaRadiansPerSecond)).normalize(Constants.MAX_WHEEL_VELOCITY));
+        setWheelSpeeds(kinematics.toWheelSpeeds(new ChassisSpeeds(
+                    targetSpeeds.vxMetersPerSecond + Constants.VX_PID.calculate(currentSpeeds.vxMetersPerSecond, targetSpeeds.vxMetersPerSecond),
+                    targetSpeeds.vyMetersPerSecond + Constants.VY_PID.calculate(currentSpeeds.vyMetersPerSecond, targetSpeeds.vyMetersPerSecond),
+                    targetSpeeds.omegaRadiansPerSecond + Constants.OMEGA_PID.calculate(currentSpeeds.omegaRadiansPerSecond,  targetSpeeds.omegaRadiansPerSecond)))
+                .normalize(Constants.MAX_WHEEL_VELOCITY));
     }
 
     public Pose2d getPose() {
