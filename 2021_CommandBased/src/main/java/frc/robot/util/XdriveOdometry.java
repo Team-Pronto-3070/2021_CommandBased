@@ -7,6 +7,7 @@ package frc.robot.util;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.geometry.Pose2d;
 import edu.wpi.first.wpilibj.geometry.Twist2d;
+import edu.wpi.first.wpilibj.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.util.Units;
 import edu.wpi.first.wpiutil.math.MatBuilder;
 import edu.wpi.first.wpiutil.math.Matrix;
@@ -88,6 +89,12 @@ public class XdriveOdometry {
    */
   public Pose2d getPoseMeters() {
     return pose;
+  }
+
+  public ChassisSpeeds getChassisSpeeds() {
+    var encoderSpeeds = VecBuilder.fill(leftEncoder.getRate(), rightEncoder.getRate(), backEncoder.getRate());
+    var chassisSpeed = inverseKinematics.times(encoderSpeeds);
+    return new ChassisSpeeds(chassisSpeed.get(0,0), chassisSpeed.get(1,0), chassisSpeed.get(2,0));
   }
 
   public Pose2d update() {

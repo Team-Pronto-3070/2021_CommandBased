@@ -174,7 +174,8 @@ public class Drive_s extends SubsystemBase{
     public void setChassisSpeeds(ChassisSpeeds targetSpeeds) {
 //        setWheelSpeeds(kinematics.toWheelSpeeds(targetSpeeds).normalize(Constants.MAX_WHEEL_VELOCITY));
 
-        var currentSpeeds = kinematics.toChassisSpeeds(getWheelSpeeds());
+//        var currentSpeeds = kinematics.toChassisSpeeds(getWheelSpeeds());
+        var currentSpeeds = odometry.getChassisSpeeds();
         setWheelSpeeds(kinematics.toWheelSpeeds(new ChassisSpeeds(
                     targetSpeeds.vxMetersPerSecond + Constants.VX_PID.calculate(currentSpeeds.vxMetersPerSecond, targetSpeeds.vxMetersPerSecond),
                     targetSpeeds.vyMetersPerSecond + Constants.VY_PID.calculate(currentSpeeds.vyMetersPerSecond, targetSpeeds.vyMetersPerSecond),
