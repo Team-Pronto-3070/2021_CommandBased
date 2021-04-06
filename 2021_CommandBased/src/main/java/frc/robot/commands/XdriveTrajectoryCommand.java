@@ -392,7 +392,7 @@ public class XdriveTrajectoryCommand extends CommandBase {
     double curTime = m_timer.get();
     double dt = curTime - m_prevTime;
 
-    var desiredState = m_trajectory.sample(curTime);
+    var desiredState = m_trajectory.sample(Math.min(curTime, m_trajectory.getTotalTimeSeconds()));
 
     var targetChassisSpeeds = m_controller.calculate(m_pose.get(), desiredState, m_desiredRotation.apply(m_trajectory, curTime));
     var targetWheelSpeeds = m_kinematics.toWheelSpeeds(targetChassisSpeeds);

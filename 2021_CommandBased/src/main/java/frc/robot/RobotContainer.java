@@ -13,6 +13,7 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.geometry.Pose2d;
 import edu.wpi.first.wpilibj.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.geometry.Translation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.trajectory.Trajectory;
@@ -100,7 +101,7 @@ public class RobotContainer {
     oi.addButton("intake_out", 2);
     oi.addButton("autoInit", 11);
     oi.addButton("auto", 12);
-    oi.addButton("teleopRotationOffset", 7);
+    oi.addButton("initialPose", 7);
     oi.addButton("resetPose", 8);
 
     oi.addButton("setARed", 3);
@@ -134,7 +135,7 @@ public class RobotContainer {
                                               new ParallelDeadlineGroup(
                                                   getAutonomousCommand(),
                                                   new RunCommand(() -> SmartDashboard.putNumber("Autonomous Time", timer.get() - startTime)))));
-    oi.getButton("teleopRotationOffset").whenPressed(new InstantCommand(() -> m_drive.setTeleopRotationOffset(m_drive.getPose().getRotation()), m_drive));
+    oi.getButton("initialPose").whenPressed(new InstantCommand(() -> m_drive.resetOdometry(Constants.INITIAL_POSE), m_drive));
     oi.getButton("resetPose").whenPressed(new InstantCommand(() -> m_drive.resetOdometry(new Pose2d()), m_drive));
   }
 
@@ -145,7 +146,7 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     return new SelectCommand(Map.ofEntries(
-                              Map.entry(autoOptions.BARREL, new XdriveTrajectoryCommand("paths/BarrelPath.wpilib.json", m_drive)),
+                              Map.entry(autoOptions.BARREL, new XdriveTrajectoryCommand("paths/BarrelPath.wpilib.json", (traj, time) -> Rotation2d.fromDegrees(-45), m_drive)),
                               Map.entry(autoOptions.BOUNCE, new XdriveTrajectoryCommand("paths/BouncePath.wpilib.json", m_drive)),
                               Map.entry(autoOptions.SLALOM, new XdriveTrajectoryCommand("paths/SlalomPath.wpilib.json", m_drive)),
                               Map.entry(autoOptions.GALACTICSEARCH, new ParallelDeadlineGroup(
@@ -165,8 +166,8 @@ public class RobotContainer {
                                   m_drive)),
                               Map.entry(autoOptions.TEST2, new XdriveTrajectoryCommand(
                                     TrajectoryGenerator.generateTrajectory(new Pose2d(0, 0, new Rotation2d(0)),
-                                                                           List.of(),
-                                                                           new Pose2d(-1, 0, new Rotation2d(0)),
+                                                                           List.of(new Translation2d(1, 0)),
+                                                                           new Pose2d(1, 1, new Rotation2d(0)),
                                               new TrajectoryConfig(1 /*max velocity*/, 0.5 /*max acceleration*/).addConstraint(new XdriveKinematicsConstraint(m_drive.getKinematics(), 1 /*max velocity*/))),
                                   m_drive))),
                             autoChooser::getSelected);
