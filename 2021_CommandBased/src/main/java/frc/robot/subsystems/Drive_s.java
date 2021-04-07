@@ -165,10 +165,10 @@ public class Drive_s extends SubsystemBase{
         SmartDashboard.putNumber("BL_SETPOINT", wheelSpeeds.rearLeftMetersPerSecond);
         SmartDashboard.putNumber("BR_SETPOINT", wheelSpeeds.rearRightMetersPerSecond);
 
-        talFL.set(ControlMode.Velocity, wheelSpeeds.frontLeftMetersPerSecond  / Constants.TICKMS_TO_MSEC, DemandType.ArbitraryFeedForward, (wheelSpeeds.frontLeftMetersPerSecond  == 0 ? 0 : Constants.FL_FF.ks) * (wheelSpeeds.frontLeftMetersPerSecond  > 0 ? 1 : -1));
-        talFR.set(ControlMode.Velocity, wheelSpeeds.frontRightMetersPerSecond / Constants.TICKMS_TO_MSEC, DemandType.ArbitraryFeedForward, (wheelSpeeds.frontRightMetersPerSecond == 0 ? 0 : Constants.FR_FF.ks) * (wheelSpeeds.frontRightMetersPerSecond > 0 ? 1 : -1));
-        talBL.set(ControlMode.Velocity, wheelSpeeds.rearLeftMetersPerSecond   / Constants.TICKMS_TO_MSEC, DemandType.ArbitraryFeedForward, (wheelSpeeds.rearLeftMetersPerSecond   == 0 ? 0 : Constants.BL_FF.ks) * (wheelSpeeds.rearLeftMetersPerSecond   > 0 ? 1 : -1));
-        talBR.set(ControlMode.Velocity, wheelSpeeds.rearRightMetersPerSecond  / Constants.TICKMS_TO_MSEC, DemandType.ArbitraryFeedForward, (wheelSpeeds.rearRightMetersPerSecond  == 0 ? 0 : Constants.BR_FF.ks) * (wheelSpeeds.rearRightMetersPerSecond  > 0 ? 1 : -1));
+        talFL.set(ControlMode.Velocity, Math.abs(wheelSpeeds.frontLeftMetersPerSecond ) > Constants.WHEEL_VELOCITY_DEADBAND ? wheelSpeeds.frontLeftMetersPerSecond  / Constants.TICKMS_TO_MSEC : 0, DemandType.ArbitraryFeedForward, (Math.abs(wheelSpeeds.frontLeftMetersPerSecond ) < Constants.WHEEL_VELOCITY_DEADBAND ? 0 : Constants.FL_FF.ks) * (wheelSpeeds.frontLeftMetersPerSecond  > 0 ? 1 : -1));
+        talFR.set(ControlMode.Velocity, Math.abs(wheelSpeeds.frontRightMetersPerSecond) > Constants.WHEEL_VELOCITY_DEADBAND ? wheelSpeeds.frontRightMetersPerSecond / Constants.TICKMS_TO_MSEC : 0, DemandType.ArbitraryFeedForward, (Math.abs(wheelSpeeds.frontRightMetersPerSecond) < Constants.WHEEL_VELOCITY_DEADBAND ? 0 : Constants.FR_FF.ks) * (wheelSpeeds.frontRightMetersPerSecond > 0 ? 1 : -1));
+        talBL.set(ControlMode.Velocity, Math.abs(wheelSpeeds.rearLeftMetersPerSecond  ) > Constants.WHEEL_VELOCITY_DEADBAND ? wheelSpeeds.rearLeftMetersPerSecond   / Constants.TICKMS_TO_MSEC : 0, DemandType.ArbitraryFeedForward, (Math.abs(wheelSpeeds.rearLeftMetersPerSecond  ) < Constants.WHEEL_VELOCITY_DEADBAND ? 0 : Constants.BL_FF.ks) * (wheelSpeeds.rearLeftMetersPerSecond   > 0 ? 1 : -1));
+        talBR.set(ControlMode.Velocity, Math.abs(wheelSpeeds.rearRightMetersPerSecond ) > Constants.WHEEL_VELOCITY_DEADBAND ? wheelSpeeds.rearRightMetersPerSecond  / Constants.TICKMS_TO_MSEC : 0, DemandType.ArbitraryFeedForward, (Math.abs(wheelSpeeds.rearRightMetersPerSecond ) < Constants.WHEEL_VELOCITY_DEADBAND ? 0 : Constants.BR_FF.ks) * (wheelSpeeds.rearRightMetersPerSecond  > 0 ? 1 : -1));
     }
 
     public void setChassisSpeeds(ChassisSpeeds targetSpeeds) {
@@ -176,6 +176,10 @@ public class Drive_s extends SubsystemBase{
 
 //        var currentSpeeds = kinematics.toChassisSpeeds(getWheelSpeeds());
         var currentSpeeds = odometry.getChassisSpeeds();
+
+        SmartDashboard.putNumber("vx", currentSpeeds.vxMetersPerSecond);
+        SmartDashboard.putNumber("vy", currentSpeeds.vyMetersPerSecond);
+
         setWheelSpeeds(kinematics.toWheelSpeeds(new ChassisSpeeds(
                     targetSpeeds.vxMetersPerSecond + Constants.VX_PID.calculate(currentSpeeds.vxMetersPerSecond, targetSpeeds.vxMetersPerSecond),
                     targetSpeeds.vyMetersPerSecond + Constants.VY_PID.calculate(currentSpeeds.vyMetersPerSecond, targetSpeeds.vyMetersPerSecond),
@@ -245,7 +249,15 @@ public class Drive_s extends SubsystemBase{
         poseEstimator.update(imu.getRotation2d(), getWheelSpeeds(), odometry.getPoseMeters());
         
         var estimatedPose = poseEstimator.getEstimatedPosition();
-        SmartDashboard.putNumber("gyro_angle", imu.getAngle());
+
+        SmartDashboard.putNumber("gyro_angle", imu.getRotation2d().minus(gyroOffset).getRadians());
+        
+        SmartDashboard.putNumber("imu_x", imu.getDisplacementX());
+        SmartDashboard.putNumber("imu_y", imu.getDisplacementY());
+
+        SmartDashboard.putNumber("imu_vx", imu.getVelocityX() * imu.getRotation2d().minus(gyroOffset).getCos());
+        SmartDashboard.putNumber("imu_vy", imu.getVelocityY() * imu.getRotation2d().minus(gyroOffset).getSin());
+
         SmartDashboard.putNumber("pose_x", estimatedPose.getX());
         SmartDashboard.putNumber("pose_y", estimatedPose.getY());
         SmartDashboard.putNumber("pose_theta", estimatedPose.getRotation().getDegrees());
