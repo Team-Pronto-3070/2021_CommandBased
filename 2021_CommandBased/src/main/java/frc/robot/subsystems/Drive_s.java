@@ -245,7 +245,8 @@ public class Drive_s extends SubsystemBase{
 
     @Override
     public void periodic() {
-        odometry.update();
+//        odometry.update();
+        odometry.updateWithGyro(imu.getRotation2d().minus(gyroOffset));
         poseEstimator.update(imu.getRotation2d(), getWheelSpeeds(), odometry.getPoseMeters());
         
         var estimatedPose = poseEstimator.getEstimatedPosition();

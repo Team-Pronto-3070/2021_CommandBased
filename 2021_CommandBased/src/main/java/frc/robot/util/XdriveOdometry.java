@@ -6,6 +6,7 @@ package frc.robot.util;
 
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.geometry.Pose2d;
+import edu.wpi.first.wpilibj.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.geometry.Twist2d;
 import edu.wpi.first.wpilibj.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.util.Units;
@@ -106,6 +107,13 @@ public class XdriveOdometry {
     var dPose = inverseKinematics.times(encoders.minus(prevEncoders));
     prevEncoders = encoders;
     pose = pose.exp(new Twist2d(dPose.get(0,0), dPose.get(1,0), dPose.get(2,0)));
+    return pose;
+  }
+
+  public Pose2d updateWithGyro(Rotation2d gyro) {
+    pose = pose.exp(new Twist2d(leftEncoder.getDistance() + (Units.inchesToMeters(Constants.ODOMETRY_WHEEL_SIDE_INCHES) * gyro.getRadians()),
+                                backEncoder.getDistance() + (Units.inchesToMeters(Constants.ODOMETRY_WHEEL_BACK_INCHES) * gyro.getRadians()),
+                                gyro.getRadians()));
     return pose;
   }
 }
