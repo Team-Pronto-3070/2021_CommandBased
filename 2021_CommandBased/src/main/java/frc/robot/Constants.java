@@ -55,10 +55,13 @@ public final class Constants {
     public static final PIDController Y_PID_CONTROLLER = new PIDController(6, 0.025, 0);
     public static final ProfiledPIDController THETA_PID_CONTROLLER = new ProfiledPIDController(3, 0, 0, new TrapezoidProfile.Constraints(MAX_ANGULAR_VELOCITY, MAX_ANGULAR_ACCELERATION));
 
-    public static final PIDController VX_PID = new PIDController(0.25, 0, 0);
-    public static final PIDController VY_PID = new PIDController(0.25, 0, 0);
-    public static final PIDController OMEGA_PID = new PIDController(0.25, 0, 0);
+    //p = .25
+    public static final PIDController VX_PID = new PIDController(0, 0, 0);
+    public static final PIDController VY_PID = new PIDController(0, 0, 0);
+    public static final PIDController OMEGA_PID = new PIDController(0, 0, 0);
 
+    //p = 750, i = 0
+    //p = 600, i = 0.1
     public static final PIDController FL_PID = new PIDController(750, 0, 0);
     public static final PIDController FR_PID = new PIDController(750, 0, 0);
     public static final PIDController BL_PID = new PIDController(750, 0, 0);
@@ -71,7 +74,7 @@ public final class Constants {
     public static final SimpleMotorFeedforward BL_FF = new SimpleMotorFeedforward(0.057, 1023.0 * (1.0 - 0.057) / 18000.0, 0);
     public static final SimpleMotorFeedforward BR_FF = new SimpleMotorFeedforward(0.057, 1023.0 * (1.0 - 0.057) / 18000.0, 0);
 
-    public static final double WHEEL_VELOCITY_DEADBAND = 0.15;
+    public static final double WHEEL_VELOCITY_DEADBAND = 0.1;
     
     //odometry constants
     public static final int[] ODOMETRY_WHEEL_LEFT_PORT = new int[] {14, 15}; //dio pins for odometry wheel encoders

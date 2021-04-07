@@ -38,6 +38,8 @@ public class XdriveOdometry {
 
   private Vector<N3> prevEncoders = new Vector<>(Nat.N3());
 
+  private double prevGyro;
+
   /**
    * Constructs a XdriveOdometry object.
    * 
@@ -111,9 +113,16 @@ public class XdriveOdometry {
   }
 
   public Pose2d updateWithGyro(Rotation2d gyro) {
-    pose = pose.exp(new Twist2d(leftEncoder.getDistance() + (Units.inchesToMeters(Constants.ODOMETRY_WHEEL_SIDE_INCHES) * gyro.getRadians()),
-                                backEncoder.getDistance() + (Units.inchesToMeters(Constants.ODOMETRY_WHEEL_BACK_INCHES) * gyro.getRadians()),
-                                gyro.getRadians()));
+    var encoders = VecBuilder.fill(leftEncoder.getDistance(), rightEncoder.getDistance(), backEncoder.getDistance());
+    var dEncoders = encoders.minus(prevEncoders);
+    prevEncoders = encoders;
+
+    var dGyro = gyro.getRadians() - prevGyro;
+    prevGyro = gyro.getRadians();
+
+    pose = pose.exp(new Twist2d(dEncoders.get(0,0) + (Units.inchesToMeters(Constants.ODOMETRY_WHEEL_SIDE_INCHES) * dGyro),
+                                dEncoders.get(2,0) + (Units.inchesToMeters(Constants.ODOMETRY_WHEEL_BACK_INCHES) * dGyro),
+                                dGyro));
     return pose;
   }
 }
