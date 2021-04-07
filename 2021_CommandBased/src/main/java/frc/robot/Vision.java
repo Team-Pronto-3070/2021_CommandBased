@@ -1,6 +1,10 @@
 package frc.robot;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
 import java.util.ArrayList;
+import java.util.Scanner;
 
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPipelineResult;
@@ -15,7 +19,68 @@ public class Vision {
 
     public Vision(){
         if(camera == null){
-            camera = new PhotonCamera("MyCamera");
+            camera = new PhotonCamera("Microsoft_LifeCam_HD-3000");
+        }
+    }
+
+    private void writePaths(){
+        File file;
+        try{
+            file = new File(Constants.PATHS_FILE);
+            FileWriter fw = new FileWriter(file);
+
+            for(PixelProfile profile : new PixelProfile[]{ARED_PROFILE, ABLUE_PROFILE,BRED_PROFILE,BBLUE_PROFILE}){
+                fw.write(profile.toString());
+            }
+            fw.close();
+        }catch(Exception e){
+            System.out.println(e);
+        }
+        
+    }
+
+    public void readPaths(){
+        File file;
+
+        try{
+            file = new File(Constants.PATHS_FILE);
+            Scanner sc = new Scanner(file);
+
+            int profileNum = 0;
+            ArrayList<PixelPoint> listToSet = new ArrayList<>();
+            double tmpPITCH = 0;
+            double tmpYAW = 0;
+            double tmpAREA = 0;
+            while(sc.hasNextLine()){
+                String currentLine = sc.nextLine();
+                if(currentLine.equals("START PROFILE")){
+                    profileNum++;
+                }else if(currentLine.equals("END POINT")){
+                    listToSet.add(new PixelPoint(tmpPITCH, tmpYAW, tmpAREA));
+                }else if(currentLine.equals("END PROFILE")){
+                    if(profileNum == 1){
+                        ARED_PROFILE = new PixelProfile(listToSet, "aRed");
+                    }else if(profileNum == 2){
+                        ABLUE_PROFILE = new PixelProfile(listToSet, "aBlue");
+                    }else if(profileNum == 3){
+                        BRED_PROFILE = new PixelProfile(listToSet, "bRed");
+                    }else if(profileNum == 4){
+                        BBLUE_PROFILE = new PixelProfile(listToSet, "bBlue");
+                    }
+                    listToSet.clear();
+                }else{
+                    if(currentLine.contains("PITCH")){
+                        tmpPITCH = Double.parseDouble(currentLine.split(" ")[1]);
+                    }else if(currentLine.contains("YAW")){
+                        tmpYAW = Double.parseDouble(currentLine.split(" ")[1]);
+                    }else if (currentLine.contains("AREA")){
+                        tmpAREA = Double.parseDouble(currentLine.split(" ")[1]);
+                    }
+                }
+            }
+            sc.close();
+        }catch(FileNotFoundException e){
+            System.out.println(e);
         }
     }
 
@@ -24,33 +89,42 @@ public class Vision {
         // Get the latest pipeline result.
         PhotonPipelineResult result = camera.getLatestResult();
 
-
+        System.out.println("Testing for targets");
+        
+        targetInfo.clear();
         if(result.hasTargets()){
 
+
+            System.out.println("-----------Found "+ result.getTargets().size());
             for (PhotonTrackedTarget target: result.getTargets()){
                 double yaw = target.getYaw();
                 double pitch = target.getPitch();
                 double area = target.getArea();
-                double skew = target.getSkew();
-
-                PixelPoint info = new PixelPoint(pitch, yaw, skew, area);
-
-                targetInfo.add(info);
+                
+                targetInfo.add(new PixelPoint(pitch, yaw, area));
 
             }
+        System.out.println("------------Captured "+targetInfo.size());
         }
     }
 
     public String selectPath(){
-        System.out.println("selecting path");
-        Vision.takeSnapshot();
-        return choosePath(targetInfo);
+        if(ARED_PROFILE != null || ABLUE_PROFILE != null || BRED_PROFILE != null || BBLUE_PROFILE != null){
+            writePaths();
+            System.out.println("selecting path");
+            Vision.takeSnapshot();
+            return choosePath(targetInfo);
+        }else{
+            System.out.println("One or more paths not set. Trying backup file.");
+            readPaths();   
+            return "none";
+        }
     }
 
     public void updateProfile(String profile){
+        System.out.println("Updating Profiles");
         Vision.takeSnapshot();
         setProfiles(targetInfo, profile);
-        System.out.println(getPathInfo(profile));
     }
 
     
@@ -59,42 +133,58 @@ public class Vision {
    * This is the pathing section!! I know it's excessibe; I'll admit, I just wanted to see how enums worked.
    */
 
-  PixelPoint[] ARED_POINTS;
-  PixelPoint[] ABLUE_POINTS;
-  PixelPoint[] BRED_POINTS;
-  PixelPoint[] BBLUE_POINTS;
+    ArrayList<PixelPoint> ARED_POINTS = new ArrayList<>();
+    ArrayList<PixelPoint> ABLUE_POINTS = new ArrayList<>();
+    ArrayList<PixelPoint> BRED_POINTS = new ArrayList<>();
+    ArrayList<PixelPoint> BBLUE_POINTS = new ArrayList<>();
 
+    //Create profile objects for the points lists (can compare objects to get match value)
+    public PixelProfile ARED_PROFILE;
+    public PixelProfile ABLUE_PROFILE;
+    public PixelProfile BRED_PROFILE;
+    public PixelProfile BBLUE_PROFILE;
+ 
     private void setProfiles(ArrayList<PixelPoint> points, String path){
+
+        if(points.size() == 0){
+            System.out.println("No points to set.");
+            return;
+        }
+
         switch(path){
             case "aRed":
-                ARED_POINTS = (PixelPoint[]) points.toArray();
+                ARED_POINTS.addAll(points);
+                System.out.println("Setting ARED path");
                 break;
             case "aBlue":
-                ABLUE_POINTS = (PixelPoint[]) points.toArray();
+                ABLUE_POINTS.addAll(points);
+                System.out.println("Setting ABLUE path");
                 break;
             case "bRed":
-                BRED_POINTS = (PixelPoint[]) points.toArray();
+                BRED_POINTS.addAll(points);
+                System.out.println("Setting BRED path");
                 break;
             case "bBlue":
-                BBLUE_POINTS = (PixelPoint[]) points.toArray();
+                BBLUE_POINTS.addAll(points);
+                System.out.println("Setting BBLUE path");
                 break;
             case "noSet":
                 break;
         }
+        ARED_PROFILE = new PixelProfile(ARED_POINTS, "aRed");
+        ABLUE_PROFILE = new PixelProfile(ABLUE_POINTS, "aBlue");
+        BRED_PROFILE = new PixelProfile(BRED_POINTS, "bRed");
+        BBLUE_PROFILE = new PixelProfile(BBLUE_POINTS, "bBlue");
+        getPathInfo(path);
     }
   //Formatted x, y, area, pointTolerance (optional) (add as many points as you want though they 
   //need to be in the same order as the camera point list)
 
   
 
-  //Create profile objects for the points lists (can compare objects to get match value)
-  public final PixelProfile ARED_PROFILE = new PixelProfile(ARED_POINTS, "aRed");
-  public final PixelProfile ABLUE_PROFILE = new PixelProfile(ABLUE_POINTS, "aBlue");
-  public final PixelProfile BRED_PROFILE = new PixelProfile(BRED_POINTS, "bRed");
-  public final PixelProfile BBLUE_PROFILE = new PixelProfile(BBLUE_POINTS, "bBlue");
+
   
   //List of preset profiles to compare too
-  PixelProfile[] profiles = {ARED_PROFILE, ABLUE_PROFILE,BRED_PROFILE,BBLUE_PROFILE};
 
   /**
    * This method takes a network table and a list of points to compare to. 
@@ -103,11 +193,12 @@ public class Vision {
    * @param points
    */
     private String choosePath(ArrayList<PixelPoint> points){
-        PixelProfile visibleProfile = new PixelProfile((PixelPoint[]) points.toArray(), "none");
+        PixelProfile visibleProfile = new PixelProfile(points, "none - DEFAULT");
+        PixelProfile[] profiles = {ARED_PROFILE, ABLUE_PROFILE,BRED_PROFILE,BBLUE_PROFILE};
 
         String chosenPath = visibleProfile.match(profiles);
     
-        if(chosenPath.equals("none")){
+        if(chosenPath.equals("none - DEFAULT")){
             System.out.println("No path chosen in java-multiCameraServer/Main.java: Main.choosePath()");
         }
 
@@ -117,21 +208,41 @@ public class Vision {
 
 
     public String getPathInfo(String profile){
-        String output;
+        String output = "";
 
         if(profile.equals("aRed")){
-            output = "Red A: pitch: "  + ARED_POINTS[0] + "yaw: " + ARED_POINTS[1] + "skew: " + ARED_POINTS[2] + "area: " + ARED_POINTS[3];
+            for(PixelPoint point: ARED_POINTS){
+                System.out.println("---");
+                System.out.println("Area:" + point.area); 
+                System.out.println("Yaw" + point.yaw); 
+                System.out.println("Pitch" + point.pitch); 
+            }
         }
         else if(profile.equals("aBlue")){
-            output = "Blue A: pitch: "  + ABLUE_POINTS[0] + "yaw: " + ABLUE_POINTS[1] + "skew: " + ABLUE_POINTS[2] + "area: " + ABLUE_POINTS[3];
+            for(PixelPoint point: ABLUE_POINTS){
+                System.out.println("---");
+                System.out.println("Area:" + point.area); 
+                System.out.println("Yaw" + point.yaw); 
+                System.out.println("Pitch" + point.pitch); 
+            }
     
         }
         else if(profile.equals("bRed")){
-            output ="Red B: pitch: "  + BRED_POINTS[0] + "yaw: " + BRED_POINTS[1] + "skew: " + BRED_POINTS[2] + "area: " + BRED_POINTS[3];
-    
+            for(PixelPoint point: BRED_POINTS){
+                System.out.println("---");
+                System.out.println("Area:" + point.area); 
+                System.out.println("Yaw" + point.yaw); 
+                System.out.println("Pitch" + point.pitch); 
+            }
         }
         else if(profile.equals("bBlue")){
-            output ="Blue B: pitch: "  + BBLUE_POINTS[0] + "yaw: " + BBLUE_POINTS[1] + "skew: " + BBLUE_POINTS[2] + "area: " + BBLUE_POINTS[3];
+            for(PixelPoint point: BBLUE_POINTS){
+                System.out.println("---");
+                System.out.println("Area:" + point.area); 
+                System.out.println("Yaw" + point.yaw); 
+                System.out.println("Pitch" + point.pitch); 
+               
+            }
         }
         else{
             output = "no path selected";
