@@ -15,6 +15,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.function.BiFunction;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.DemandType;
@@ -26,6 +27,7 @@ import com.ctre.phoenix.motorcontrol.can.TalonFX;
 import com.kauailabs.navx.frc.AHRS;
 
 import frc.robot.Constants;
+import frc.robot.commands.XdriveTrajectoryCommand;
 import frc.robot.util.XdriveKinematics;
 import frc.robot.util.XdriveOdometry;
 import frc.robot.util.XdrivePoseEstimator;
@@ -236,6 +238,36 @@ public class Drive_s extends SubsystemBase{
             DriverStation.reportError("Unable to open trajectory: " + JSONPath, ex.getStackTrace());
         }
         return trajectory;
+    }
+
+    public XdriveTrajectoryCommand makeTrajectoryCommand(Trajectory trajectory, BiFunction<Trajectory, Double, Rotation2d> desiredRotation) {
+        return new XdriveTrajectoryCommand(
+            trajectory,
+            this::getPose,
+            Constants.X_PID_CONTROLLER,
+            Constants.Y_PID_CONTROLLER,
+            Constants.THETA_PID_CONTROLLER,
+            desiredRotation,
+            this::setChassisSpeeds,
+            this);
+    }
+
+    public XdriveTrajectoryCommand makeTrajectoryCommand(Trajectory trajectory) {
+        return makeTrajectoryCommand(
+            trajectory,
+            (traj, time) -> Rotation2d.fromDegrees(0));
+    }
+
+    public XdriveTrajectoryCommand makeTrajectoryCommand(String path, BiFunction<Trajectory, Double, Rotation2d> desiredRotation) {
+        return makeTrajectoryCommand(
+            trajectoryFromJSON(path),
+            desiredRotation);
+    }
+
+    public XdriveTrajectoryCommand makeTrajectoryCommand(String path) {
+        return makeTrajectoryCommand(
+            trajectoryFromJSON(path),
+            (traj, time) -> Rotation2d.fromDegrees(0));
     }
 
     public Rotation2d getTeleopRotation() {

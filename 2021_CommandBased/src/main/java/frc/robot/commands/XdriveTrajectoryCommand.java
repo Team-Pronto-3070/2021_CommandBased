@@ -12,15 +12,12 @@ import edu.wpi.first.wpilibj.controller.SimpleMotorFeedforward;
 import edu.wpi.first.wpilibj.geometry.Pose2d;
 import edu.wpi.first.wpilibj.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.kinematics.ChassisSpeeds;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.trajectory.Trajectory;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 
 import frc.robot.util.XdriveKinematics;
 import frc.robot.util.XdriveWheelSpeeds;
-import frc.robot.subsystems.Drive_s;
-import frc.robot.Constants;
 
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -44,9 +41,13 @@ import java.util.function.BiFunction;
 public class XdriveTrajectoryCommand extends CommandBase {
   private final Timer m_timer = new Timer();
   private final boolean m_usePID;
+  private final boolean m_chassisSpeeds;
   private final Trajectory m_trajectory;
   private final Supplier<Pose2d> m_pose;
-  private final SimpleMotorFeedforward m_feedforward;
+  private final SimpleMotorFeedforward m_frontLeftFeedforward;
+  private final SimpleMotorFeedforward m_rearLeftFeedforward;
+  private final SimpleMotorFeedforward m_frontRightFeedforward;
+  private final SimpleMotorFeedforward m_rearRightFeedforward;
   private final XdriveKinematics m_kinematics;
   private final HolonomicDriveController m_controller;
   private final BiFunction<Trajectory, Double, Rotation2d> m_desiredRotation;
@@ -58,10 +59,9 @@ public class XdriveTrajectoryCommand extends CommandBase {
   private final Supplier<XdriveWheelSpeeds> m_currentWheelSpeeds;
   private final Consumer<XdriveWheelSpeeds> m_outputDriveVoltages;
   private final Consumer<XdriveWheelSpeeds> m_outputWheelSpeeds;
+  private final Consumer<ChassisSpeeds> m_outputChassisSpeeds;
   private XdriveWheelSpeeds m_prevSpeeds;
   private double m_prevTime;
-
-  private Drive_s m_drive;
 
   /**
    * Constructs a new XdriveControllerCommand that when executed will follow the provided
@@ -94,7 +94,10 @@ public class XdriveTrajectoryCommand extends CommandBase {
   public XdriveTrajectoryCommand(
       Trajectory trajectory,
       Supplier<Pose2d> pose,
-      SimpleMotorFeedforward feedforward,
+      SimpleMotorFeedforward frontLeftFeedforward,
+      SimpleMotorFeedforward rearLeftFeedforward,
+      SimpleMotorFeedforward frontRightFeedforward,
+      SimpleMotorFeedforward rearRightFeedforward,
       XdriveKinematics kinematics,
       PIDController xController,
       PIDController yController,
@@ -110,7 +113,12 @@ public class XdriveTrajectoryCommand extends CommandBase {
       Subsystem... requirements) {
     m_trajectory = trajectory;
     m_pose = pose;
-    m_feedforward = feedforward;
+
+    m_frontLeftFeedforward = frontLeftFeedforward;
+    m_rearLeftFeedforward = rearLeftFeedforward;
+    m_frontRightFeedforward = frontRightFeedforward;
+    m_rearRightFeedforward = rearRightFeedforward;
+
     m_kinematics = kinematics;
 
     m_controller = new HolonomicDriveController(xController, yController, thetaController);
@@ -130,77 +138,12 @@ public class XdriveTrajectoryCommand extends CommandBase {
 
     m_outputWheelSpeeds = null;
 
+    m_outputChassisSpeeds = null;
+
     m_usePID = true;
+    m_chassisSpeeds = false;
 
     addRequirements(requirements);
-  }
-
-  /**
-   * Constructs a new XdriveControllerCommand that when executed will follow the provided
-   * trajectory. PID control and feedforward are handled internally. Outputs are scaled from -12 to
-   * 12 as a voltage output to the motor.
-   *
-   * <p>Note: The controllers will *not* set the outputVolts to zero upon completion of the path
-   * this is left to the user, since it is not appropriate for paths with nonstationary endstates.
-   *
-   * <p>Note 2: The final rotation of the robot will be set to the rotation of the final pose in the
-   * trajectory. The robot will not follow the rotations from the poses at each timestep. If
-   * alternate rotation behavior is desired, the other constructor with a supplier for rotation
-   * should be used.
-   *
-   * @param trajectory The trajectory to follow.
-   * @param pose A function that supplies the robot pose - use one of the odometry classes to
-   *     provide this.
-   * @param feedforward The feedforward to use for the drivetrain.
-   * @param kinematics The kinematics for the robot drivetrain.
-   * @param xController The Trajectory Tracker PID controller for the robot's x position.
-   * @param yController The Trajectory Tracker PID controller for the robot's y position.
-   * @param thetaController The Trajectory Tracker PID controller for angle for the robot.
-   * @param maxWheelVelocityMetersPerSecond The maximum velocity of a drivetrain wheel.
-   * @param frontLeftController The front left wheel velocity PID.
-   * @param rearLeftController The rear left wheel velocity PID.
-   * @param frontRightController The front right wheel velocity PID.
-   * @param rearRightController The rear right wheel velocity PID.
-   * @param currentWheelSpeeds A XdriveWheelSpeeds object containing the current wheel speeds.
-   * @param outputDriveVoltages A XdriveMotorVoltages object containing the output motor
-   *     voltages.
-   * @param requirements The subsystems to require.
-   */
-  public XdriveTrajectoryCommand(
-      Trajectory trajectory,
-      Supplier<Pose2d> pose,
-      SimpleMotorFeedforward feedforward,
-      XdriveKinematics kinematics,
-      PIDController xController,
-      PIDController yController,
-      ProfiledPIDController thetaController,
-      double maxWheelVelocityMetersPerSecond,
-      PIDController frontLeftController,
-      PIDController rearLeftController,
-      PIDController frontRightController,
-      PIDController rearRightController,
-      Supplier<XdriveWheelSpeeds> currentWheelSpeeds,
-      Consumer<XdriveWheelSpeeds> outputDriveVoltages,
-      Subsystem... requirements) {
-
-    this(
-        trajectory,
-        pose,
-        feedforward,
-        kinematics,
-        xController,
-        yController,
-        thetaController,
-//        (traj, time) -> traj.getStates().get(traj.getStates().size() - 1).poseMeters.getRotation(),
-        (traj, time) -> new Rotation2d(),
-        maxWheelVelocityMetersPerSecond,
-        frontLeftController,
-        rearLeftController,
-        frontRightController,
-        rearRightController,
-        currentWheelSpeeds,
-        outputDriveVoltages,
-        requirements);
   }
 
   /**
@@ -236,7 +179,12 @@ public class XdriveTrajectoryCommand extends CommandBase {
       Subsystem... requirements) {
     m_trajectory = trajectory;
     m_pose = pose;
-    m_feedforward = new SimpleMotorFeedforward(0, 0, 0);
+
+    m_frontLeftFeedforward  = new SimpleMotorFeedforward(0, 0, 0);
+    m_rearLeftFeedforward   = new SimpleMotorFeedforward(0, 0, 0);
+    m_frontRightFeedforward = new SimpleMotorFeedforward(0, 0, 0);
+    m_rearRightFeedforward  = new SimpleMotorFeedforward(0, 0, 0);
+
     m_kinematics = kinematics;
 
     m_controller = new HolonomicDriveController(xController, yController, thetaController);
@@ -256,124 +204,56 @@ public class XdriveTrajectoryCommand extends CommandBase {
 
     m_outputDriveVoltages = null;
 
+    m_outputChassisSpeeds = null;
+
     m_usePID = false;
+    m_chassisSpeeds = false;
 
     addRequirements(requirements);
   }
 
-  /**
-   * Constructs a new XdriveControllerCommand that when executed will follow the provided
-   * trajectory. The user should implement a velocity PID on the desired output wheel velocities.
-   *
-   * <p>Note: The controllers will *not* set the outputVolts to zero upon completion of the path -
-   * this is left to the user, since it is not appropriate for paths with non-stationary end-states.
-   *
-   * <p>Note 2: The final rotation of the robot will be set to the rotation of the final pose in the
-   * trajectory. The robot will not follow the rotations from the poses at each timestep. If
-   * alternate rotation behavior is desired, the other constructor with a supplier for rotation
-   * should be used.
-   *
-   * @param trajectory The trajectory to follow.
-   * @param pose A function that supplies the robot pose - use one of the odometry classes to
-   *     provide this.
-   * @param kinematics The kinematics for the robot drivetrain.
-   * @param xController The Trajectory Tracker PID controller for the robot's x position.
-   * @param yController The Trajectory Tracker PID controller for the robot's y position.
-   * @param thetaController The Trajectory Tracker PID controller for angle for the robot.
-   * @param maxWheelVelocityMetersPerSecond The maximum velocity of a drivetrain wheel.
-   * @param outputWheelSpeeds A XdriveWheelSpeeds object containing the output wheel speeds.
-   * @param requirements The subsystems to require.
-   */
   public XdriveTrajectoryCommand(
       Trajectory trajectory,
       Supplier<Pose2d> pose,
-      XdriveKinematics kinematics,
       PIDController xController,
       PIDController yController,
       ProfiledPIDController thetaController,
-      double maxWheelVelocityMetersPerSecond,
-      Consumer<XdriveWheelSpeeds> outputWheelSpeeds,
-      Subsystem... requirements) {
-    this(
-        trajectory,
-        pose,
-        kinematics,
-        xController,
-        yController,
-        thetaController,
-//        (traj, time) -> traj.getStates().get(traj.getStates().size() - 1).poseMeters.getRotation(),
-        (traj, time) -> new Rotation2d(),
-        maxWheelVelocityMetersPerSecond,
-        outputWheelSpeeds,
-        requirements);
-  }
-
-  /**
-   * Constructs a new XdriveControllerCommand that when executed will follow the provided
-   * trajectory. The user should implement a velocity PID on the desired output wheel velocities.
-   *
-   * <p>Note: The controllers will *not* set the outputVolts to zero upon completion of the path -
-   * this is left to the user, since it is not appropriate for paths with non-stationary end-states.
-   *
-   * @param trajectory The trajectory to follow.
-   * @param desiredRotation The angle that the robot should be facing. This is sampled at each time
-   *     step.
-   * @param drive The instance of the drive subsystem.
-   */
-  public XdriveTrajectoryCommand(
-      Trajectory trajectory,
       BiFunction<Trajectory, Double, Rotation2d> desiredRotation,
-      Drive_s drive) {
-        this(trajectory,
-             drive::getPose,
-             drive.getKinematics(),
-             Constants.X_PID_CONTROLLER,
-             Constants.Y_PID_CONTROLLER,
-             Constants.THETA_PID_CONTROLLER,
-             desiredRotation,
-             Constants.MAX_WHEEL_VELOCITY,
-             drive::setWheelSpeeds,
-             drive);
-        m_drive = drive;
-      }
+      Consumer<ChassisSpeeds> outputChassisSpeeds,
+      Subsystem... requirements) {
+    m_trajectory = trajectory;
+    m_pose = pose;
 
-  /**
-   * Constructs a new XdriveControllerCommand that when executed will follow the provided
-   * trajectory. The user should implement a velocity PID on the desired output wheel velocities.
-   *
-   * <p>Note: The controllers will *not* set the outputVolts to zero upon completion of the path -
-   * this is left to the user, since it is not appropriate for paths with non-stationary end-states.
-   *
-   * <p>Note 2: The final rotation of the robot will be set to the rotation of the final pose in the
-   * trajectory. The robot will not follow the rotations from the poses at each timestep. If
-   * alternate rotation behavior is desired, the other constructor with a supplier for rotation
-   * should be used.
-   *
-   * @param trajectory The trajectory to follow.
-   * @param drive The instance of the drive subsystem.
-   */
-  public XdriveTrajectoryCommand(
-    Trajectory trajectory,
-    Drive_s drive) {
-        this(trajectory,
-             drive::getPose,
-             drive.getKinematics(),
-             Constants.X_PID_CONTROLLER,
-             Constants.Y_PID_CONTROLLER,
-             Constants.THETA_PID_CONTROLLER,
-             (traj, time) -> new Rotation2d(),
-             Constants.MAX_WHEEL_VELOCITY,
-             drive::setWheelSpeeds,
-             drive);
-        m_drive = drive;
-  }
+    m_frontLeftFeedforward  = null;
+    m_rearLeftFeedforward   = null;
+    m_frontRightFeedforward = null;
+    m_rearRightFeedforward  = null;
 
-  public XdriveTrajectoryCommand(String path, Drive_s drive) {
-    this(drive.trajectoryFromJSON(path), drive);
-  }
+    m_kinematics = null;
 
-  public XdriveTrajectoryCommand(String path, BiFunction<Trajectory, Double, Rotation2d> desiredRotation, Drive_s drive) {
-    this(drive.trajectoryFromJSON(path), desiredRotation, drive);
+    m_controller = new HolonomicDriveController(xController, yController, thetaController);
+
+    m_desiredRotation = desiredRotation;
+
+    m_maxWheelVelocityMetersPerSecond = 0;
+
+    m_frontLeftController = null;
+    m_rearLeftController = null;
+    m_frontRightController = null;
+    m_rearRightController = null;
+
+    m_currentWheelSpeeds = null;
+
+    m_outputWheelSpeeds = null;
+
+    m_outputDriveVoltages = null;
+
+    m_outputChassisSpeeds = outputChassisSpeeds;
+
+    m_usePID = false;
+    m_chassisSpeeds = true;
+
+    addRequirements(requirements);
   }
 
   @Override
@@ -385,7 +265,7 @@ public class XdriveTrajectoryCommand extends CommandBase {
     var initialYVelocity =
         initialState.velocityMetersPerSecond * initialState.poseMeters.getRotation().getSin();
 
-    m_prevSpeeds = m_kinematics.toWheelSpeeds(new ChassisSpeeds(initialXVelocity, initialYVelocity, 0.0));
+    if (!m_chassisSpeeds) m_prevSpeeds = m_kinematics.toWheelSpeeds(new ChassisSpeeds(initialXVelocity, initialYVelocity, 0.0));
 
     m_timer.reset();
     m_timer.start();
@@ -399,82 +279,80 @@ public class XdriveTrajectoryCommand extends CommandBase {
     var desiredState = m_trajectory.sample(Math.min(curTime, m_trajectory.getTotalTimeSeconds()));
 
     var targetChassisSpeeds = m_controller.calculate(m_pose.get(), desiredState, m_desiredRotation.apply(m_trajectory, curTime));
-    var targetWheelSpeeds = m_kinematics.toWheelSpeeds(targetChassisSpeeds);
+    
+    if (m_chassisSpeeds) {
+      m_outputChassisSpeeds.accept(targetChassisSpeeds);
+    } else{
+      var targetWheelSpeeds = m_kinematics.toWheelSpeeds(targetChassisSpeeds);
 
-    targetWheelSpeeds.normalize(m_maxWheelVelocityMetersPerSecond);
+      targetWheelSpeeds.normalize(m_maxWheelVelocityMetersPerSecond);
 
-    var frontLeftSpeedSetpoint = targetWheelSpeeds.frontLeftMetersPerSecond;
-    var rearLeftSpeedSetpoint = targetWheelSpeeds.rearLeftMetersPerSecond;
-    var frontRightSpeedSetpoint = targetWheelSpeeds.frontRightMetersPerSecond;
-    var rearRightSpeedSetpoint = targetWheelSpeeds.rearRightMetersPerSecond;
+      var frontLeftSpeedSetpoint = targetWheelSpeeds.frontLeftMetersPerSecond;
+      var rearLeftSpeedSetpoint = targetWheelSpeeds.rearLeftMetersPerSecond;
+      var frontRightSpeedSetpoint = targetWheelSpeeds.frontRightMetersPerSecond;
+      var rearRightSpeedSetpoint = targetWheelSpeeds.rearRightMetersPerSecond;
 
-    SmartDashboard.putNumber("FL_SETPOINT", frontLeftSpeedSetpoint);
-    SmartDashboard.putNumber("FR_SETPOINT", frontRightSpeedSetpoint);
-    SmartDashboard.putNumber("BL_SETPOINT", rearLeftSpeedSetpoint);
-    SmartDashboard.putNumber("BR_SETPOINT", rearRightSpeedSetpoint);
+      double frontLeftOutput;
+      double rearLeftOutput;
+      double frontRightOutput;
+      double rearRightOutput;
 
-    double frontLeftOutput;
-    double rearLeftOutput;
-    double frontRightOutput;
-    double rearRightOutput;
+      if (m_usePID) {
+        final double frontLeftFeedforward =
+            m_frontLeftFeedforward.calculate(
+                frontLeftSpeedSetpoint,
+                (frontLeftSpeedSetpoint - m_prevSpeeds.frontLeftMetersPerSecond) / dt);
 
-    if (m_usePID) {
-      final double frontLeftFeedforward =
-          Constants.FL_FF.calculate(
-              frontLeftSpeedSetpoint,
-              (frontLeftSpeedSetpoint - m_prevSpeeds.frontLeftMetersPerSecond) / dt);
+        final double rearLeftFeedforward =
+            m_rearLeftFeedforward.calculate(
+                rearLeftSpeedSetpoint,
+                (rearLeftSpeedSetpoint - m_prevSpeeds.rearLeftMetersPerSecond) / dt);
 
-      final double rearLeftFeedforward =
-          Constants.BL_FF.calculate(
-              rearLeftSpeedSetpoint,
-              (rearLeftSpeedSetpoint - m_prevSpeeds.rearLeftMetersPerSecond) / dt);
+        final double frontRightFeedforward =
+            m_frontRightFeedforward.calculate(
+                frontRightSpeedSetpoint,
+                (frontRightSpeedSetpoint - m_prevSpeeds.frontRightMetersPerSecond) / dt);
 
-      final double frontRightFeedforward =
-          Constants.FR_FF.calculate(
-              frontRightSpeedSetpoint,
-              (frontRightSpeedSetpoint - m_prevSpeeds.frontRightMetersPerSecond) / dt);
+        final double rearRightFeedforward =
+            m_rearRightFeedforward.calculate(
+                rearRightSpeedSetpoint,
+                (rearRightSpeedSetpoint - m_prevSpeeds.rearRightMetersPerSecond) / dt);
 
-      final double rearRightFeedforward =
-          Constants.BR_FF.calculate(
-              rearRightSpeedSetpoint,
-              (rearRightSpeedSetpoint - m_prevSpeeds.rearRightMetersPerSecond) / dt);
+        frontLeftOutput =
+            frontLeftFeedforward
+                + m_frontLeftController.calculate(
+                    m_currentWheelSpeeds.get().frontLeftMetersPerSecond, frontLeftSpeedSetpoint);
 
-      frontLeftOutput =
-          frontLeftFeedforward
-              + m_frontLeftController.calculate(
-                  m_currentWheelSpeeds.get().frontLeftMetersPerSecond, frontLeftSpeedSetpoint);
+        rearLeftOutput =
+            rearLeftFeedforward
+                + m_rearLeftController.calculate(
+                    m_currentWheelSpeeds.get().rearLeftMetersPerSecond, rearLeftSpeedSetpoint);
 
-      rearLeftOutput =
-          rearLeftFeedforward
-              + m_rearLeftController.calculate(
-                  m_currentWheelSpeeds.get().rearLeftMetersPerSecond, rearLeftSpeedSetpoint);
+        frontRightOutput =
+            frontRightFeedforward
+                + m_frontRightController.calculate(
+                    m_currentWheelSpeeds.get().frontRightMetersPerSecond, frontRightSpeedSetpoint);
 
-      frontRightOutput =
-          frontRightFeedforward
-              + m_frontRightController.calculate(
-                  m_currentWheelSpeeds.get().frontRightMetersPerSecond, frontRightSpeedSetpoint);
+        rearRightOutput =
+            rearRightFeedforward
+                + m_rearRightController.calculate(
+                    m_currentWheelSpeeds.get().rearRightMetersPerSecond, rearRightSpeedSetpoint);
 
-      rearRightOutput =
-          rearRightFeedforward
-              + m_rearRightController.calculate(
-                  m_currentWheelSpeeds.get().rearRightMetersPerSecond, rearRightSpeedSetpoint);
+        m_outputDriveVoltages.accept(
+            new XdriveWheelSpeeds(
+                frontLeftOutput, frontRightOutput, rearLeftOutput, rearRightOutput));
 
-      m_outputDriveVoltages.accept(
-          new XdriveWheelSpeeds(
-              frontLeftOutput, frontRightOutput, rearLeftOutput, rearRightOutput));
-
-    } else {
-//      m_outputWheelSpeeds.accept(
-//          new XdriveWheelSpeeds(
-//              frontLeftSpeedSetpoint,
-//              frontRightSpeedSetpoint,
-//              rearLeftSpeedSetpoint,
-//              rearRightSpeedSetpoint));
-        m_drive.setChassisSpeeds(targetChassisSpeeds);
+      } else {
+        m_outputWheelSpeeds.accept(
+            new XdriveWheelSpeeds(
+                frontLeftSpeedSetpoint,
+                frontRightSpeedSetpoint,
+                rearLeftSpeedSetpoint,
+                rearRightSpeedSetpoint));
+      }
+      m_prevSpeeds = targetWheelSpeeds;
     }
-
     m_prevTime = curTime;
-    m_prevSpeeds = targetWheelSpeeds;
   }
 
   @Override

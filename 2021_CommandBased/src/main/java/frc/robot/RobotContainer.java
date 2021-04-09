@@ -124,10 +124,10 @@ public class RobotContainer {
     oi.getButton("autoInit").whenPressed(new SequentialCommandGroup(
                                               new InstantCommand(() -> m_drive.resetOdometry(Constants.INITIAL_POSE), m_drive),
                                               new SelectCommand(Map.ofEntries(
-                                                                    Map.entry(autoOptions.BARREL, new XdriveTrajectoryCommand(generateInitTrajectory("paths/BarrelPath.wpilib.json"), m_drive)),
-                                                                    Map.entry(autoOptions.BOUNCE, new XdriveTrajectoryCommand(generateInitTrajectory("paths/BouncePath.wpilib.json"), m_drive)),
-                                                                    Map.entry(autoOptions.SLALOM, new XdriveTrajectoryCommand(generateInitTrajectory("paths/SlalomPath.wpilib.json"), m_drive)),
-                                                                    Map.entry(autoOptions.GALACTICSEARCH, new XdriveTrajectoryCommand(generateInitTrajectory("paths/aRed.wpilib.json"), m_drive))),
+                                                                    Map.entry(autoOptions.BARREL, m_drive.makeTrajectoryCommand(generateInitTrajectory("paths/BarrelPath.wpilib.json"))),
+                                                                    Map.entry(autoOptions.BOUNCE, m_drive.makeTrajectoryCommand(generateInitTrajectory("paths/BouncePath.wpilib.json"))),
+                                                                    Map.entry(autoOptions.SLALOM, m_drive.makeTrajectoryCommand(generateInitTrajectory("paths/SlalomPath.wpilib.json"))),
+                                                                    Map.entry(autoOptions.GALACTICSEARCH, m_drive.makeTrajectoryCommand(generateInitTrajectory("paths/aRed.wpilib.json")))),
                                                                 autoChooser::getSelected)));
     //when pressed, run autonomous with a timer
     oi.getButton("auto").whenPressed(new SequentialCommandGroup(
@@ -147,30 +147,29 @@ public class RobotContainer {
   public Command getAutonomousCommand() {
     vis.readPaths();
     return new SelectCommand(Map.ofEntries(
-                              Map.entry(autoOptions.BARREL, new XdriveTrajectoryCommand("paths/BarrelPath.wpilib.json", (traj, time) -> Rotation2d.fromDegrees(-45), m_drive)),
-                              Map.entry(autoOptions.BOUNCE, new XdriveTrajectoryCommand("paths/BouncePath.wpilib.json", m_drive)),
-                              Map.entry(autoOptions.SLALOM, new XdriveTrajectoryCommand("paths/SlalomPath.wpilib.json", m_drive)),
+                              Map.entry(autoOptions.BARREL, m_drive.makeTrajectoryCommand("paths/BarrelPath.wpilib.json", (traj, time) -> Rotation2d.fromDegrees(-45))),
+                              Map.entry(autoOptions.BOUNCE, m_drive.makeTrajectoryCommand("paths/BouncePath.wpilib.json")),
+                              Map.entry(autoOptions.SLALOM, m_drive.makeTrajectoryCommand("paths/SlalomPath.wpilib.json")),
                               Map.entry(autoOptions.GALACTICSEARCH, new ParallelDeadlineGroup(
                                                                       new SelectCommand(Map.ofEntries(
-                                                                                          Map.entry("aRed", new XdriveTrajectoryCommand("paths/aRed.wpilib.json", m_drive)),
-                                                                                          Map.entry("bRed", new XdriveTrajectoryCommand("paths/bRed.wpilib.json", m_drive)),
-                                                                                          Map.entry("aBlue", new XdriveTrajectoryCommand("paths/aBlue.wpilib.json", m_drive)),
-                                                                                          Map.entry("bBlue", new XdriveTrajectoryCommand("paths/bBlue.wpilib.json", m_drive))),
+                                                                                          Map.entry("aRed", m_drive.makeTrajectoryCommand("paths/aRed.wpilib.json")),
+                                                                                          Map.entry("bRed", m_drive.makeTrajectoryCommand("paths/bRed.wpilib.json")),
+                                                                                          Map.entry("aBlue", m_drive.makeTrajectoryCommand("paths/aBlue.wpilib.json")),
+                                                                                          Map.entry("bBlue", m_drive.makeTrajectoryCommand("paths/bBlue.wpilib.json"))),
                                                                                           vis::selectPath),
                                                                       new RunCommand(() -> m_intake.set(Constants.IN_SPEED), m_intake))),
                               
-                              Map.entry(autoOptions.TEST1, new XdriveTrajectoryCommand(
+                              Map.entry(autoOptions.TEST1, m_drive.makeTrajectoryCommand(
                                     TrajectoryGenerator.generateTrajectory(new Pose2d(0, 0, new Rotation2d(0)),
                                                                            List.of(),
                                                                            new Pose2d(1, 0, new Rotation2d(0)),
-                                              new TrajectoryConfig(1 /*max velocity*/, 0.5 /*max acceleration*/).addConstraint(new XdriveKinematicsConstraint(m_drive.getKinematics(), 1 /*max velocity*/))),
-                                  m_drive)),
-                              Map.entry(autoOptions.TEST2, new XdriveTrajectoryCommand(
+                                              new TrajectoryConfig(1 /*max velocity*/, 0.5 /*max acceleration*/).addConstraint(new XdriveKinematicsConstraint(m_drive.getKinematics(), 1 /*max velocity*/))))),
+                              
+                              Map.entry(autoOptions.TEST2, m_drive.makeTrajectoryCommand(
                                     TrajectoryGenerator.generateTrajectory(new Pose2d(0, 0, new Rotation2d(0)),
                                                                            List.of(new Translation2d(1, 0)),
                                                                            new Pose2d(1, 1, new Rotation2d(0)),
-                                              new TrajectoryConfig(1 /*max velocity*/, 0.5 /*max acceleration*/).addConstraint(new XdriveKinematicsConstraint(m_drive.getKinematics(), 1 /*max velocity*/))),
-                                  m_drive))),
+                                              new TrajectoryConfig(1 /*max velocity*/, 0.5 /*max acceleration*/).addConstraint(new XdriveKinematicsConstraint(m_drive.getKinematics(), 1 /*max velocity*/)))))),
                             autoChooser::getSelected);
   }
 }
