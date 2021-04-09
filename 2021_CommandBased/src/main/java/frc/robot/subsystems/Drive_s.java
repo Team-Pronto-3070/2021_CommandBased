@@ -35,24 +35,16 @@ import frc.robot.util.XdriveWheelSpeeds;
 
 public class Drive_s extends SubsystemBase{
 
-    //create motor objects
     TalonFX talFL;
     TalonFX talFR;
     TalonFX talBL;
     TalonFX talBR;
 
-    //create kinematics
     XdriveKinematics kinematics;
-
-    //create odometry
     XdriveOdometry odometry;
-
     private final XdrivePoseEstimator poseEstimator;
-
     private AHRS imu;
-
     private Field2d field = new Field2d();
-
     private Rotation2d gyroOffset = new Rotation2d();
     
     public Drive_s(){
@@ -129,7 +121,6 @@ public class Drive_s extends SubsystemBase{
                                           new Translation2d(Units.inchesToMeters(Constants.DRIVETRAIN_RADIUS_INCHES), new Rotation2d(5 * Math.PI / 4)),
                                           new Translation2d(Units.inchesToMeters(Constants.DRIVETRAIN_RADIUS_INCHES), new Rotation2d(7 * Math.PI / 4)));
         
-        //initialize odometry
         odometry = new XdriveOdometry();
 
         poseEstimator = new XdrivePoseEstimator(imu.getRotation2d(),
@@ -162,21 +153,23 @@ public class Drive_s extends SubsystemBase{
     }
 
     public void setWheelSpeeds(XdriveWheelSpeeds wheelSpeeds) {
-        SmartDashboard.putNumber("FL_SETPOINT", wheelSpeeds.frontLeftMetersPerSecond);
-        SmartDashboard.putNumber("FR_SETPOINT", wheelSpeeds.frontRightMetersPerSecond);
-        SmartDashboard.putNumber("BL_SETPOINT", wheelSpeeds.rearLeftMetersPerSecond);
-        SmartDashboard.putNumber("BR_SETPOINT", wheelSpeeds.rearRightMetersPerSecond);
+        var FL_setpoint =  Math.abs(wheelSpeeds.frontLeftMetersPerSecond) > Constants.WHEEL_VELOCITY_DEADBAND ? wheelSpeeds.frontLeftMetersPerSecond : 0;
+        var FR_setpoint =  Math.abs(wheelSpeeds.frontRightMetersPerSecond) > Constants.WHEEL_VELOCITY_DEADBAND ? wheelSpeeds.frontRightMetersPerSecond : 0;
+        var BL_setpoint =  Math.abs(wheelSpeeds.rearLeftMetersPerSecond) > Constants.WHEEL_VELOCITY_DEADBAND ? wheelSpeeds.rearLeftMetersPerSecond : 0;
+        var BR_setpoint =  Math.abs(wheelSpeeds.rearRightMetersPerSecond) > Constants.WHEEL_VELOCITY_DEADBAND ? wheelSpeeds.rearRightMetersPerSecond : 0;
+        
+        SmartDashboard.putNumber("FL_SETPOINT", FL_setpoint);
+        SmartDashboard.putNumber("FR_SETPOINT", FR_setpoint);
+        SmartDashboard.putNumber("BL_SETPOINT", BL_setpoint);
+        SmartDashboard.putNumber("BR_SETPOINT", BR_setpoint);
 
-        talFL.set(ControlMode.Velocity, Math.abs(wheelSpeeds.frontLeftMetersPerSecond ) > Constants.WHEEL_VELOCITY_DEADBAND ? wheelSpeeds.frontLeftMetersPerSecond  / Constants.TICKMS_TO_MSEC : 0, DemandType.ArbitraryFeedForward, (Math.abs(wheelSpeeds.frontLeftMetersPerSecond ) < Constants.WHEEL_VELOCITY_DEADBAND ? 0 : Constants.FL_FF.ks) * (wheelSpeeds.frontLeftMetersPerSecond  > 0 ? 1 : -1));
-        talFR.set(ControlMode.Velocity, Math.abs(wheelSpeeds.frontRightMetersPerSecond) > Constants.WHEEL_VELOCITY_DEADBAND ? wheelSpeeds.frontRightMetersPerSecond / Constants.TICKMS_TO_MSEC : 0, DemandType.ArbitraryFeedForward, (Math.abs(wheelSpeeds.frontRightMetersPerSecond) < Constants.WHEEL_VELOCITY_DEADBAND ? 0 : Constants.FR_FF.ks) * (wheelSpeeds.frontRightMetersPerSecond > 0 ? 1 : -1));
-        talBL.set(ControlMode.Velocity, Math.abs(wheelSpeeds.rearLeftMetersPerSecond  ) > Constants.WHEEL_VELOCITY_DEADBAND ? wheelSpeeds.rearLeftMetersPerSecond   / Constants.TICKMS_TO_MSEC : 0, DemandType.ArbitraryFeedForward, (Math.abs(wheelSpeeds.rearLeftMetersPerSecond  ) < Constants.WHEEL_VELOCITY_DEADBAND ? 0 : Constants.BL_FF.ks) * (wheelSpeeds.rearLeftMetersPerSecond   > 0 ? 1 : -1));
-        talBR.set(ControlMode.Velocity, Math.abs(wheelSpeeds.rearRightMetersPerSecond ) > Constants.WHEEL_VELOCITY_DEADBAND ? wheelSpeeds.rearRightMetersPerSecond  / Constants.TICKMS_TO_MSEC : 0, DemandType.ArbitraryFeedForward, (Math.abs(wheelSpeeds.rearRightMetersPerSecond ) < Constants.WHEEL_VELOCITY_DEADBAND ? 0 : Constants.BR_FF.ks) * (wheelSpeeds.rearRightMetersPerSecond  > 0 ? 1 : -1));
+        talFL.set(ControlMode.Velocity, FL_setpoint / Constants.TICKMS_TO_MSEC, DemandType.ArbitraryFeedForward, Constants.FL_FF.ks * Math.signum(FL_setpoint));
+        talFR.set(ControlMode.Velocity, FR_setpoint / Constants.TICKMS_TO_MSEC, DemandType.ArbitraryFeedForward, Constants.FR_FF.ks * Math.signum(FR_setpoint));
+        talBL.set(ControlMode.Velocity, BL_setpoint / Constants.TICKMS_TO_MSEC, DemandType.ArbitraryFeedForward, Constants.BL_FF.ks * Math.signum(BL_setpoint));
+        talBR.set(ControlMode.Velocity, BR_setpoint / Constants.TICKMS_TO_MSEC, DemandType.ArbitraryFeedForward, Constants.BR_FF.ks * Math.signum(BR_setpoint));
     }
 
     public void setChassisSpeeds(ChassisSpeeds targetSpeeds) {
-//        setWheelSpeeds(kinematics.toWheelSpeeds(targetSpeeds).normalize(Constants.MAX_WHEEL_VELOCITY));
-
-//        var currentSpeeds = kinematics.toChassisSpeeds(getWheelSpeeds());
         var currentSpeeds = odometry.getChassisSpeeds();
 
         SmartDashboard.putNumber("vx", currentSpeeds.vxMetersPerSecond);
@@ -205,28 +198,11 @@ public class Drive_s extends SubsystemBase{
         return kinematics;
     }
     
-
-    /**
-     * needs to be implemented
-     * 
-     * @return the current velocity of each wheel in m/s
-     */
     public XdriveWheelSpeeds getWheelSpeeds() {
         return new XdriveWheelSpeeds(Constants.TICKMS_TO_MSEC * talFL.getSelectedSensorVelocity(),
                                      Constants.TICKMS_TO_MSEC * talFR.getSelectedSensorVelocity(),
                                      Constants.TICKMS_TO_MSEC * talBL.getSelectedSensorVelocity(),
                                      Constants.TICKMS_TO_MSEC * talBR.getSelectedSensorVelocity());
-    }
-
-    /**
-     * Stops the motors when called
-     */
-    public void setStop(){
-        talFL.set(ControlMode.PercentOutput, 0); // Stops the left motors
-        talBL.set(ControlMode.PercentOutput, 0);
-
-        talFR.set(ControlMode.PercentOutput, 0); // Stops the right motors
-        talBR.set(ControlMode.PercentOutput, 0);
     }
 
     public Trajectory trajectoryFromJSON(String JSONPath) {
