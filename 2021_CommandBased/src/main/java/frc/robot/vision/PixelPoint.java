@@ -1,4 +1,4 @@
-package frc.robot;
+package frc.robot.vision;
 
 /**
  * This class represents a point in the middle of a box with an x, y, and area value

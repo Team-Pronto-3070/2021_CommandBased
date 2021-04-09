@@ -1,4 +1,4 @@
-package frc.robot;
+package frc.robot.vision;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -9,6 +9,8 @@ import java.util.Scanner;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPipelineResult;
 import org.photonvision.PhotonTrackedTarget;
+
+import frc.robot.Constants;
 
 public class Vision {
 
