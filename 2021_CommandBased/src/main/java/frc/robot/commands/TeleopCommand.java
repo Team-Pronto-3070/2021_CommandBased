@@ -1,29 +1,17 @@
 package frc.robot.commands;
 
-import edu.wpi.first.wpilibj.Timer;
-
 import edu.wpi.first.wpilibj.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 
 import frc.robot.subsystems.Drive_s;
-import frc.robot.util.XdriveWheelSpeeds;
 import frc.robot.Constants;
 import frc.robot.OI;
 
-/** Relays to robot for movement according to joysticks
-*
-* Also needs DriveTrain Subsystem
-*/
+public class TeleopCommand extends CommandBase {
 
-public class TeleopCommand extends CommandBase{
-  //Drive & OI objects
   Drive_s _drive;
   OI _oi;
-
-  Timer timer = new Timer();
-  double prevTime = timer.get();
-  XdriveWheelSpeeds m_prevSpeeds = new XdriveWheelSpeeds();
 
   public TeleopCommand(Drive_s _drive, OI _oi) {
     this._drive = _drive;
