@@ -1,4 +1,4 @@
-package frc.robot;
+package frc.robot.vision;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -9,6 +9,8 @@ import java.util.Scanner;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPipelineResult;
 import org.photonvision.PhotonTrackedTarget;
+
+import frc.robot.Constants;
 
 public class Vision {
 
@@ -26,7 +28,7 @@ public class Vision {
     private void writePaths(){
         File file;
         try{
-            file = new File(Constants.PATHS_FILE);
+            file = new File(Constants.Vision.PATHS_FILE);
             FileWriter fw = new FileWriter(file);
 
             for(PixelProfile profile : new PixelProfile[]{ARED_PROFILE, ABLUE_PROFILE,BRED_PROFILE,BBLUE_PROFILE}){
@@ -43,7 +45,7 @@ public class Vision {
         File file;
 
         try{
-            file = new File(Constants.PATHS_FILE);
+            file = new File(Constants.Vision.PATHS_FILE);
             Scanner sc = new Scanner(file);
 
             int profileNum = 0;

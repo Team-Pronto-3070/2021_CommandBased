@@ -31,7 +31,7 @@ public class OI
         buttons = new HashMap<>();
 
     
-        joystick = new Joystick(Constants.JOY_PORT);
+        joystick = new Joystick(Constants.Teleop.JOY_PORT);
 
     }
 

@@ -6,8 +6,9 @@ package frc.robot.util;
 
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.geometry.Pose2d;
+import edu.wpi.first.wpilibj.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.geometry.Twist2d;
-import edu.wpi.first.wpilibj.util.Units;
+import edu.wpi.first.wpilibj.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpiutil.math.MatBuilder;
 import edu.wpi.first.wpiutil.math.Matrix;
 import edu.wpi.first.wpiutil.math.VecBuilder;
@@ -36,6 +37,8 @@ public class XdriveOdometry {
 
   private Vector<N3> prevEncoders = new Vector<>(Nat.N3());
 
+  private double prevGyro;
+
   /**
    * Constructs a XdriveOdometry object.
    * 
@@ -44,25 +47,25 @@ public class XdriveOdometry {
   public XdriveOdometry(Pose2d initialPoseMeters) {
     pose = initialPoseMeters;
 
-    leftEncoder = new Encoder(Constants.ODOMETRY_WHEEL_LEFT_PORT[0],
-                              Constants.ODOMETRY_WHEEL_LEFT_PORT[1],
-                              Constants.ODOMETRY_WHEEL_LEFT_REVERSED);
+    leftEncoder = new Encoder(Constants.Odometry.LEFT_PORT[0],
+                              Constants.Odometry.LEFT_PORT[1],
+                              Constants.Odometry.LEFT_REVERSED);
     
-    rightEncoder = new Encoder(Constants.ODOMETRY_WHEEL_RIGHT_PORT[0],
-                               Constants.ODOMETRY_WHEEL_RIGHT_PORT[1],
-                               Constants.ODOMETRY_WHEEL_RIGHT_REVERSED);
+    rightEncoder = new Encoder(Constants.Odometry.RIGHT_PORT[0],
+                               Constants.Odometry.RIGHT_PORT[1],
+                               Constants.Odometry.RIGHT_REVERSED);
     
-    backEncoder = new Encoder(Constants.ODOMETRY_WHEEL_BACK_PORT[0],
-                              Constants.ODOMETRY_WHEEL_BACK_PORT[1],
-                              Constants.ODOMETRY_WHEEL_BACK_REVERSED);
+    backEncoder = new Encoder(Constants.Odometry.BACK_PORT[0],
+                              Constants.Odometry.BACK_PORT[1],
+                              Constants.Odometry.BACK_REVERSED);
 
-    leftEncoder.setDistancePerPulse(Constants.ODOMETRY_WHEEL_METERS_PER_PULSE_L);
-    rightEncoder.setDistancePerPulse(Constants.ODOMETRY_WHEEL_METERS_PER_PULSE_R);
-    backEncoder.setDistancePerPulse(Constants.ODOMETRY_WHEEL_METERS_PER_PULSE_B);
+    leftEncoder.setDistancePerPulse(Constants.Odometry.METERS_PER_PULSE_L);
+    rightEncoder.setDistancePerPulse(Constants.Odometry.METERS_PER_PULSE_R);
+    backEncoder.setDistancePerPulse(Constants.Odometry.METERS_PER_PULSE_B);
 
-    inverseKinematics = new MatBuilder<>(Nat.N3(), Nat.N3()).fill(1, 0, -1 * Units.inchesToMeters(Constants.ODOMETRY_WHEEL_SIDE_INCHES),
-                                                                  1, 0,      Units.inchesToMeters(Constants.ODOMETRY_WHEEL_SIDE_INCHES),
-                                                                  0, 1, -1 * Units.inchesToMeters(Constants.ODOMETRY_WHEEL_BACK_INCHES)).inv();
+    inverseKinematics = new MatBuilder<>(Nat.N3(), Nat.N3()).fill(1, 0, -1 * Constants.Odometry.SIDE_METERS,
+                                                                  1, 0,      Constants.Odometry.SIDE_METERS,
+                                                                  0, 1, -1 * Constants.Odometry.BACK_METERS).inv();
   }
 
   /**
@@ -90,6 +93,12 @@ public class XdriveOdometry {
     return pose;
   }
 
+  public ChassisSpeeds getChassisSpeeds() {
+    var encoderSpeeds = VecBuilder.fill(leftEncoder.getRate(), rightEncoder.getRate(), backEncoder.getRate());
+    var chassisSpeed = inverseKinematics.times(encoderSpeeds);
+    return new ChassisSpeeds(chassisSpeed.get(0,0), chassisSpeed.get(1,0), chassisSpeed.get(2,0));
+  }
+
   public Pose2d update() {
     SmartDashboard.putNumber("left_encoder", leftEncoder.getDistance());
     SmartDashboard.putNumber("right_encoder", rightEncoder.getDistance());
@@ -99,6 +108,20 @@ public class XdriveOdometry {
     var dPose = inverseKinematics.times(encoders.minus(prevEncoders));
     prevEncoders = encoders;
     pose = pose.exp(new Twist2d(dPose.get(0,0), dPose.get(1,0), dPose.get(2,0)));
+    return pose;
+  }
+
+  public Pose2d updateWithGyro(Rotation2d gyro) {
+    var encoders = VecBuilder.fill(leftEncoder.getDistance(), rightEncoder.getDistance(), backEncoder.getDistance());
+    var dEncoders = encoders.minus(prevEncoders);
+    prevEncoders = encoders;
+
+    var dGyro = gyro.getRadians() - prevGyro;
+    prevGyro = gyro.getRadians();
+
+    pose = pose.exp(new Twist2d(dEncoders.get(0,0) + (Constants.Odometry.SIDE_METERS * dGyro),
+                                dEncoders.get(2,0) + (Constants.Odometry.BACK_METERS * dGyro),
+                                dGyro));
     return pose;
   }
 }
