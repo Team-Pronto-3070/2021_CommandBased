@@ -48,10 +48,10 @@ public class Drive_s extends SubsystemBase{
     private Rotation2d gyroOffset = new Rotation2d();
     
     public Drive_s(){
-        talFL = new TalonFX(Constants.TAL_FL_PORT);
-        talBL = new TalonFX(Constants.TAL_BL_PORT);
-        talFR = new TalonFX(Constants.TAL_FR_PORT);
-        talBR = new TalonFX(Constants.TAL_BR_PORT);
+        talFL = new TalonFX(Constants.Drive.TAL_FL_PORT);
+        talBL = new TalonFX(Constants.Drive.TAL_BL_PORT);
+        talFR = new TalonFX(Constants.Drive.TAL_FR_PORT);
+        talBR = new TalonFX(Constants.Drive.TAL_BR_PORT);
 
         talFL.configFactoryDefault();
         talFR.configFactoryDefault();
@@ -68,15 +68,15 @@ public class Drive_s extends SubsystemBase{
         talBL.setNeutralMode(NeutralMode.Coast);
         talBR.setNeutralMode(NeutralMode.Coast);
 
-        talFL.configOpenloopRamp(Constants.RAMP_TIME);
-        talBL.configOpenloopRamp(Constants.RAMP_TIME);
-        talFR.configOpenloopRamp(Constants.RAMP_TIME);
-        talBR.configOpenloopRamp(Constants.RAMP_TIME);
+        talFL.configOpenloopRamp(Constants.Drive.RAMP_TIME);
+        talBL.configOpenloopRamp(Constants.Drive.RAMP_TIME);
+        talFR.configOpenloopRamp(Constants.Drive.RAMP_TIME);
+        talBR.configOpenloopRamp(Constants.Drive.RAMP_TIME);
 
-        talFL.configClosedloopRamp(Constants.RAMP_TIME);
-        talFR.configClosedloopRamp(Constants.RAMP_TIME);
-        talBL.configClosedloopRamp(Constants.RAMP_TIME);
-        talBR.configClosedloopRamp(Constants.RAMP_TIME);
+        talFL.configClosedloopRamp(Constants.Drive.RAMP_TIME);
+        talFR.configClosedloopRamp(Constants.Drive.RAMP_TIME);
+        talBL.configClosedloopRamp(Constants.Drive.RAMP_TIME);
+        talBR.configClosedloopRamp(Constants.Drive.RAMP_TIME);
 
         talFL.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor);
 		talFR.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor);
@@ -93,42 +93,42 @@ public class Drive_s extends SubsystemBase{
         talBL.configSelectedFeedbackCoefficient(1);
         talBR.configSelectedFeedbackCoefficient(1);
 
-        talFL.config_kP(0, Constants.FL_PID.getP() * Constants.TICKMS_TO_MSEC);
-        talFL.config_kI(0, Constants.FL_PID.getI() * Constants.TICKMS_TO_MSEC);
-        talFL.config_kD(0, Constants.FL_PID.getD() * Constants.TICKMS_TO_MSEC);
-        talFL.config_kF(0, Constants.FL_FF.kv);
+        talFL.config_kP(0, Constants.Drive.FL_PID.getP() * Constants.Drive.TICKMS_TO_MSEC);
+        talFL.config_kI(0, Constants.Drive.FL_PID.getI() * Constants.Drive.TICKMS_TO_MSEC);
+        talFL.config_kD(0, Constants.Drive.FL_PID.getD() * Constants.Drive.TICKMS_TO_MSEC);
+        talFL.config_kF(0, Constants.Drive.FL_FF.kv);
         
-        talFR.config_kP(0, Constants.FR_PID.getP() * Constants.TICKMS_TO_MSEC);
-        talFR.config_kI(0, Constants.FR_PID.getI() * Constants.TICKMS_TO_MSEC);
-        talFR.config_kD(0, Constants.FR_PID.getD() * Constants.TICKMS_TO_MSEC);
-        talFR.config_kF(0, Constants.FR_FF.kv);
+        talFR.config_kP(0, Constants.Drive.FR_PID.getP() * Constants.Drive.TICKMS_TO_MSEC);
+        talFR.config_kI(0, Constants.Drive.FR_PID.getI() * Constants.Drive.TICKMS_TO_MSEC);
+        talFR.config_kD(0, Constants.Drive.FR_PID.getD() * Constants.Drive.TICKMS_TO_MSEC);
+        talFR.config_kF(0, Constants.Drive.FR_FF.kv);
 
-        talBL.config_kP(0, Constants.BL_PID.getP() * Constants.TICKMS_TO_MSEC);
-        talBL.config_kI(0, Constants.BL_PID.getI() * Constants.TICKMS_TO_MSEC);
-        talBL.config_kD(0, Constants.BL_PID.getD() * Constants.TICKMS_TO_MSEC);
-        talBL.config_kF(0, Constants.BL_FF.kv);
+        talBL.config_kP(0, Constants.Drive.BL_PID.getP() * Constants.Drive.TICKMS_TO_MSEC);
+        talBL.config_kI(0, Constants.Drive.BL_PID.getI() * Constants.Drive.TICKMS_TO_MSEC);
+        talBL.config_kD(0, Constants.Drive.BL_PID.getD() * Constants.Drive.TICKMS_TO_MSEC);
+        talBL.config_kF(0, Constants.Drive.BL_FF.kv);
 
-        talBR.config_kP(0, Constants.BR_PID.getP() * Constants.TICKMS_TO_MSEC);
-        talBR.config_kI(0, Constants.BR_PID.getI() * Constants.TICKMS_TO_MSEC);
-        talBR.config_kD(0, Constants.BR_PID.getD() * Constants.TICKMS_TO_MSEC);
-        talBR.config_kF(0, Constants.BR_FF.kv);
+        talBR.config_kP(0, Constants.Drive.BR_PID.getP() * Constants.Drive.TICKMS_TO_MSEC);
+        talBR.config_kI(0, Constants.Drive.BR_PID.getI() * Constants.Drive.TICKMS_TO_MSEC);
+        talBR.config_kD(0, Constants.Drive.BR_PID.getD() * Constants.Drive.TICKMS_TO_MSEC);
+        talBR.config_kF(0, Constants.Drive.BR_FF.kv);
 
-        imu = new AHRS(Constants.IMU_PORT);
+        imu = new AHRS(Constants.Odometry.IMU_PORT);
 
         //initialize kinematics with relative locations of wheels
-        kinematics = new XdriveKinematics(new Translation2d(Units.inchesToMeters(Constants.DRIVETRAIN_RADIUS_INCHES), new Rotation2d(3 * Math.PI / 4)),
-                                          new Translation2d(Units.inchesToMeters(Constants.DRIVETRAIN_RADIUS_INCHES), new Rotation2d(1 * Math.PI / 4)),
-                                          new Translation2d(Units.inchesToMeters(Constants.DRIVETRAIN_RADIUS_INCHES), new Rotation2d(5 * Math.PI / 4)),
-                                          new Translation2d(Units.inchesToMeters(Constants.DRIVETRAIN_RADIUS_INCHES), new Rotation2d(7 * Math.PI / 4)));
+        kinematics = new XdriveKinematics(new Translation2d(Units.inchesToMeters(Constants.Drive.RADIUS_METERS), new Rotation2d(3 * Math.PI / 4)),
+                                          new Translation2d(Units.inchesToMeters(Constants.Drive.RADIUS_METERS), new Rotation2d(1 * Math.PI / 4)),
+                                          new Translation2d(Units.inchesToMeters(Constants.Drive.RADIUS_METERS), new Rotation2d(5 * Math.PI / 4)),
+                                          new Translation2d(Units.inchesToMeters(Constants.Drive.RADIUS_METERS), new Rotation2d(7 * Math.PI / 4)));
         
         odometry = new XdriveOdometry();
 
         poseEstimator = new XdrivePoseEstimator(imu.getRotation2d(),
-                                                Constants.INITIAL_POSE,
+                                                new Pose2d(),
                                                 kinematics,
-                                                Constants.STATE_STD_DEVS,
-                                                Constants.IMU_STD_DEVS,
-                                                Constants.ODOMETRY_STD_DEVS);
+                                                Constants.Odometry.STATE_STD_DEVS,
+                                                Constants.Odometry.IMU_STD_DEVS,
+                                                Constants.Odometry.ODOMETRY_STD_DEVS);
         
         SmartDashboard.putData("Field", field);
     }
@@ -153,20 +153,20 @@ public class Drive_s extends SubsystemBase{
     }
 
     public void setWheelSpeeds(XdriveWheelSpeeds wheelSpeeds) {
-        var FL_setpoint =  Math.abs(wheelSpeeds.frontLeftMetersPerSecond) > Constants.WHEEL_VELOCITY_DEADBAND ? wheelSpeeds.frontLeftMetersPerSecond : 0;
-        var FR_setpoint =  Math.abs(wheelSpeeds.frontRightMetersPerSecond) > Constants.WHEEL_VELOCITY_DEADBAND ? wheelSpeeds.frontRightMetersPerSecond : 0;
-        var BL_setpoint =  Math.abs(wheelSpeeds.rearLeftMetersPerSecond) > Constants.WHEEL_VELOCITY_DEADBAND ? wheelSpeeds.rearLeftMetersPerSecond : 0;
-        var BR_setpoint =  Math.abs(wheelSpeeds.rearRightMetersPerSecond) > Constants.WHEEL_VELOCITY_DEADBAND ? wheelSpeeds.rearRightMetersPerSecond : 0;
+        var FL_setpoint =  Math.abs(wheelSpeeds.frontLeftMetersPerSecond) > Constants.Drive.WHEEL_VELOCITY_DEADBAND ? wheelSpeeds.frontLeftMetersPerSecond : 0;
+        var FR_setpoint =  Math.abs(wheelSpeeds.frontRightMetersPerSecond) > Constants.Drive.WHEEL_VELOCITY_DEADBAND ? wheelSpeeds.frontRightMetersPerSecond : 0;
+        var BL_setpoint =  Math.abs(wheelSpeeds.rearLeftMetersPerSecond) > Constants.Drive.WHEEL_VELOCITY_DEADBAND ? wheelSpeeds.rearLeftMetersPerSecond : 0;
+        var BR_setpoint =  Math.abs(wheelSpeeds.rearRightMetersPerSecond) > Constants.Drive.WHEEL_VELOCITY_DEADBAND ? wheelSpeeds.rearRightMetersPerSecond : 0;
         
         SmartDashboard.putNumber("FL_SETPOINT", FL_setpoint);
         SmartDashboard.putNumber("FR_SETPOINT", FR_setpoint);
         SmartDashboard.putNumber("BL_SETPOINT", BL_setpoint);
         SmartDashboard.putNumber("BR_SETPOINT", BR_setpoint);
 
-        talFL.set(ControlMode.Velocity, FL_setpoint / Constants.TICKMS_TO_MSEC, DemandType.ArbitraryFeedForward, Constants.FL_FF.ks * Math.signum(FL_setpoint));
-        talFR.set(ControlMode.Velocity, FR_setpoint / Constants.TICKMS_TO_MSEC, DemandType.ArbitraryFeedForward, Constants.FR_FF.ks * Math.signum(FR_setpoint));
-        talBL.set(ControlMode.Velocity, BL_setpoint / Constants.TICKMS_TO_MSEC, DemandType.ArbitraryFeedForward, Constants.BL_FF.ks * Math.signum(BL_setpoint));
-        talBR.set(ControlMode.Velocity, BR_setpoint / Constants.TICKMS_TO_MSEC, DemandType.ArbitraryFeedForward, Constants.BR_FF.ks * Math.signum(BR_setpoint));
+        talFL.set(ControlMode.Velocity, FL_setpoint / Constants.Drive.TICKMS_TO_MSEC, DemandType.ArbitraryFeedForward, Constants.Drive.FL_FF.ks * Math.signum(FL_setpoint));
+        talFR.set(ControlMode.Velocity, FR_setpoint / Constants.Drive.TICKMS_TO_MSEC, DemandType.ArbitraryFeedForward, Constants.Drive.FR_FF.ks * Math.signum(FR_setpoint));
+        talBL.set(ControlMode.Velocity, BL_setpoint / Constants.Drive.TICKMS_TO_MSEC, DemandType.ArbitraryFeedForward, Constants.Drive.BL_FF.ks * Math.signum(BL_setpoint));
+        talBR.set(ControlMode.Velocity, BR_setpoint / Constants.Drive.TICKMS_TO_MSEC, DemandType.ArbitraryFeedForward, Constants.Drive.BR_FF.ks * Math.signum(BR_setpoint));
     }
 
     public void setChassisSpeeds(ChassisSpeeds targetSpeeds) {
@@ -176,10 +176,10 @@ public class Drive_s extends SubsystemBase{
         SmartDashboard.putNumber("vy", currentSpeeds.vyMetersPerSecond);
 
         setWheelSpeeds(kinematics.toWheelSpeeds(new ChassisSpeeds(
-                    targetSpeeds.vxMetersPerSecond + Constants.VX_PID.calculate(currentSpeeds.vxMetersPerSecond, targetSpeeds.vxMetersPerSecond),
-                    targetSpeeds.vyMetersPerSecond + Constants.VY_PID.calculate(currentSpeeds.vyMetersPerSecond, targetSpeeds.vyMetersPerSecond),
-                    targetSpeeds.omegaRadiansPerSecond + Constants.OMEGA_PID.calculate(currentSpeeds.omegaRadiansPerSecond,  targetSpeeds.omegaRadiansPerSecond)))
-                .normalize(Constants.MAX_WHEEL_VELOCITY));
+                    targetSpeeds.vxMetersPerSecond + Constants.Drive.VX_PID.calculate(currentSpeeds.vxMetersPerSecond, targetSpeeds.vxMetersPerSecond),
+                    targetSpeeds.vyMetersPerSecond + Constants.Drive.VY_PID.calculate(currentSpeeds.vyMetersPerSecond, targetSpeeds.vyMetersPerSecond),
+                    targetSpeeds.omegaRadiansPerSecond + Constants.Drive.OMEGA_PID.calculate(currentSpeeds.omegaRadiansPerSecond,  targetSpeeds.omegaRadiansPerSecond)))
+                .normalize(Constants.Drive.MAX_WHEEL_VELOCITY));
     }
 
     public Pose2d getPose() {
@@ -199,10 +199,10 @@ public class Drive_s extends SubsystemBase{
     }
     
     public XdriveWheelSpeeds getWheelSpeeds() {
-        return new XdriveWheelSpeeds(Constants.TICKMS_TO_MSEC * talFL.getSelectedSensorVelocity(),
-                                     Constants.TICKMS_TO_MSEC * talFR.getSelectedSensorVelocity(),
-                                     Constants.TICKMS_TO_MSEC * talBL.getSelectedSensorVelocity(),
-                                     Constants.TICKMS_TO_MSEC * talBR.getSelectedSensorVelocity());
+        return new XdriveWheelSpeeds(Constants.Drive.TICKMS_TO_MSEC * talFL.getSelectedSensorVelocity(),
+                                     Constants.Drive.TICKMS_TO_MSEC * talFR.getSelectedSensorVelocity(),
+                                     Constants.Drive.TICKMS_TO_MSEC * talBL.getSelectedSensorVelocity(),
+                                     Constants.Drive.TICKMS_TO_MSEC * talBR.getSelectedSensorVelocity());
     }
 
     public Trajectory trajectoryFromJSON(String JSONPath) {
@@ -220,9 +220,9 @@ public class Drive_s extends SubsystemBase{
         return new XdriveTrajectoryCommand(
             trajectory,
             this::getPose,
-            Constants.X_PID_CONTROLLER,
-            Constants.Y_PID_CONTROLLER,
-            Constants.THETA_PID_CONTROLLER,
+            Constants.Drive.X_PID_CONTROLLER,
+            Constants.Drive.Y_PID_CONTROLLER,
+            Constants.Drive.THETA_PID_CONTROLLER,
             desiredRotation,
             this::setChassisSpeeds,
             this);
@@ -279,9 +279,9 @@ public class Drive_s extends SubsystemBase{
         field.setRobotPose(poseEstimator.getEstimatedPosition());
         field.getObject("odometry").setPose(odometry.getPoseMeters());
 
-        SmartDashboard.putNumber("FL velocity", Constants.TICKMS_TO_MSEC * talFL.getSelectedSensorVelocity());
-        SmartDashboard.putNumber("FR velocity", Constants.TICKMS_TO_MSEC * talFR.getSelectedSensorVelocity());
-        SmartDashboard.putNumber("BL velocity", Constants.TICKMS_TO_MSEC * talBL.getSelectedSensorVelocity());
-        SmartDashboard.putNumber("BR velocity", Constants.TICKMS_TO_MSEC * talBR.getSelectedSensorVelocity());
+        SmartDashboard.putNumber("FL velocity", Constants.Drive.TICKMS_TO_MSEC * talFL.getSelectedSensorVelocity());
+        SmartDashboard.putNumber("FR velocity", Constants.Drive.TICKMS_TO_MSEC * talFR.getSelectedSensorVelocity());
+        SmartDashboard.putNumber("BL velocity", Constants.Drive.TICKMS_TO_MSEC * talBL.getSelectedSensorVelocity());
+        SmartDashboard.putNumber("BR velocity", Constants.Drive.TICKMS_TO_MSEC * talBR.getSelectedSensorVelocity());
     }
 }

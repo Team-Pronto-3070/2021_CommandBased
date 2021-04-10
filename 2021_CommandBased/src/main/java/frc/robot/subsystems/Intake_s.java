@@ -10,7 +10,7 @@ public class Intake_s extends SubsystemBase{
     TalonSRX talIN;
 
     public Intake_s() {
-        talIN = new TalonSRX(Constants.TAL_INTAKE_PORT);
+        talIN = new TalonSRX(Constants.Intake.PORT);
     }
 
     public void set(double velocity){

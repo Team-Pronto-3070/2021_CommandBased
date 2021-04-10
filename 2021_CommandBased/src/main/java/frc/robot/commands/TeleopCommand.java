@@ -29,9 +29,9 @@ public class TeleopCommand extends CommandBase {
 
     _drive.setChassisSpeeds(
             ChassisSpeeds.fromFieldRelativeSpeeds(
-                (Math.abs(_oi.getX()) < Constants.JOY_STICK_VX_DEADZONE) ? 0 : _oi.getX() * Constants.VX_COEFFICENT,
-                (Math.abs(_oi.getY()) < Constants.JOY_STICK_VY_DEADZONE) ? 0 : _oi.getY() * Constants.VY_COEFFICENT,
-                (Math.abs(_oi.getTheta()) < Constants.JOY_STICK_OMEGA_DEADZONE) ? 0 : _oi.getTheta() * Constants.OMEGA_COEFFICENT,
+                (Math.abs(_oi.getX()) < Constants.Teleop.VX_DEADZONE) ? 0 : _oi.getX() * Constants.Teleop.VX_COEFFICENT,
+                (Math.abs(_oi.getY()) < Constants.Teleop.VY_DEADZONE) ? 0 : _oi.getY() * Constants.Teleop.VY_COEFFICENT,
+                (Math.abs(_oi.getTheta()) < Constants.Teleop.OMEGA_DEADZONE) ? 0 : _oi.getTheta() * Constants.Teleop.OMEGA_COEFFICENT,
                 _drive.getTeleopRotation()));
   }
 }

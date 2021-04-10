@@ -82,7 +82,7 @@ public class RobotContainer {
   }
 
   private Trajectory generateInitTrajectory(String path) {
-    return TrajectoryGenerator.generateTrajectory(Constants.INITIAL_POSE,
+    return TrajectoryGenerator.generateTrajectory(Constants.Auto.INITIAL_POSE,
                                                   List.of(),
                                                   m_drive.trajectoryFromJSON(path).getInitialPose(),
                                                   new TrajectoryConfig(1 /*max velocity*/, 0.5 /*max acceleration*/)
@@ -117,12 +117,12 @@ public class RobotContainer {
     oi.getButton("selectPath").whenPressed(new InstantCommand(() -> System.out.println("\n\n"+vis.selectPath()+"\n\n")));
 
     // Referencing the added buttons when pressed
-    oi.getButton("intake_in").whileHeld(new InstantCommand(() -> m_intake.set(Constants.IN_SPEED), m_intake), true);
-    oi.getButton("intake_out").whileHeld(new InstantCommand(() -> m_intake.set(Constants.OUT_SPEED), m_intake), true);
+    oi.getButton("intake_in").whileHeld(new InstantCommand(() -> m_intake.set(Constants.Intake.IN_SPEED), m_intake), true);
+    oi.getButton("intake_out").whileHeld(new InstantCommand(() -> m_intake.set(Constants.Intake.OUT_SPEED), m_intake), true);
 
     //when pressed, initialize odometry and move to starting location for autonomous
     oi.getButton("autoInit").whenPressed(new SequentialCommandGroup(
-                                              new InstantCommand(() -> m_drive.resetOdometry(Constants.INITIAL_POSE), m_drive),
+                                              new InstantCommand(() -> m_drive.resetOdometry(Constants.Auto.INITIAL_POSE), m_drive),
                                               new SelectCommand(Map.ofEntries(
                                                                     Map.entry(autoOptions.BARREL, m_drive.makeTrajectoryCommand(generateInitTrajectory("paths/BarrelPath.wpilib.json"))),
                                                                     Map.entry(autoOptions.BOUNCE, m_drive.makeTrajectoryCommand(generateInitTrajectory("paths/BouncePath.wpilib.json"))),
@@ -135,7 +135,7 @@ public class RobotContainer {
                                               new ParallelDeadlineGroup(
                                                   getAutonomousCommand(),
                                                   new RunCommand(() -> SmartDashboard.putNumber("Autonomous Time", timer.get() - startTime)))));
-    oi.getButton("initialPose").whenPressed(new InstantCommand(() -> m_drive.resetOdometry(Constants.INITIAL_POSE), m_drive));
+    oi.getButton("initialPose").whenPressed(new InstantCommand(() -> m_drive.resetOdometry(Constants.Auto.INITIAL_POSE), m_drive));
     oi.getButton("resetPose").whenPressed(new InstantCommand(() -> m_drive.resetOdometry(new Pose2d()), m_drive));
   }
 
@@ -157,7 +157,7 @@ public class RobotContainer {
                                                                                           Map.entry("aBlue", m_drive.makeTrajectoryCommand("paths/aBlue.wpilib.json")),
                                                                                           Map.entry("bBlue", m_drive.makeTrajectoryCommand("paths/bBlue.wpilib.json"))),
                                                                                           vis::selectPath),
-                                                                      new RunCommand(() -> m_intake.set(Constants.IN_SPEED), m_intake))),
+                                                                      new RunCommand(() -> m_intake.set(Constants.Intake.IN_SPEED), m_intake))),
                               
                               Map.entry(autoOptions.TEST1, m_drive.makeTrajectoryCommand(
                                     TrajectoryGenerator.generateTrajectory(new Pose2d(0, 0, new Rotation2d(0)),
